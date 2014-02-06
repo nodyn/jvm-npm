@@ -13,7 +13,7 @@
     this.exports = {};
     this.parent = parent;
     this.children = [];
-    this.filename = null;
+    this.filename = id;
     this.loaded = false;
     self = this;
     

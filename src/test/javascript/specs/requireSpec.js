@@ -82,6 +82,11 @@ describe("NPM Modules", function() {
       expect(outer.innerParent.id).toBe([cwd, 'lib/outer.js'].join('/'));
     });
 
+    it("A module should have a filename property", function() {
+      var outer = require('./lib/outer');
+      expect(outer.filename).toBe([cwd, 'lib/outer.js'].join('/'));
+    });
+
     it("A module should have a children property", function() {
       var outer = require('./lib/outer');
       expect(outer.children.length).toBe(1);
