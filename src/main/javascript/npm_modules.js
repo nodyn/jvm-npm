@@ -1,3 +1,5 @@
+// Since we intend to use the Function constructor.
+/* jshint evil: true */
 (function() {
   // Keep a reference to DynJS's builtin require()
   NativeRequire = { require: require };
@@ -22,9 +24,10 @@
   Module._load = function(file, parent) {
     var module = new Module(file, parent);
     var body   = Module._readFile(file);
-    var func   = new Function('exports', 'require', 'module', 
+    var dir    = new File(file).getParent();
+    var func   = new Function('exports', 'module', 
                                '__filename', '__dirname', body);
-    func(module.exports, Module.require, module, file, parent);
+    func(module.exports, module, file, dir);
     return module.exports;
   };
 
@@ -53,9 +56,11 @@
     throw new Error("Cannot find module " + id);
   }
 
+  Module.require = Require;
   Require.root = System.getProperty('user.dir');
   Require.resolve = Module._resolve;
   Require.cache = {};
   Require.extensions = {};
   require = Require;
 }());
+

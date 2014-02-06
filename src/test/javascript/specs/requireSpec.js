@@ -57,6 +57,26 @@ describe("NPM Modules", function() {
       expect(function() {require('./not_found.js');}).toThrow(new Error('Cannot find module ./not_found.js'));
     });
 
+    it("should have a __dirname property", function() {
+      var top = require('./simple_module');
+      expect(top.dirname).toBe(cwd);
+    });
+
+    it("should have a __filename property", function() {
+      var top = require('./simple_module');
+      expect(top.filename).toBe([cwd, 'simple_module.js'].join('/'));
+    });
+
+    it("should not expose private module functions globally", function() {
+      var top = require('./simple_module');
+      expect(top.privateFunction).toBe(undefined);
+    });
+
+    it("should support nested requires", function() {
+      var outer = require('outer');
+      expect(outer.quadruple(2)).toBe(8);
+    });
+
   }); // describe Global require()
 
 }); // describe NPM modules
