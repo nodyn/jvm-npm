@@ -17,7 +17,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.dynjs>0.2.1</version.dynjs>
+    <version.dynjs>0.2.2-SNAPSHOT</version.dynjs>
     <version.jasmine-cli>0.0.12</version.jasmine-cli>
   </properties>
 
