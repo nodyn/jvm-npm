@@ -82,6 +82,12 @@ describe("NPM Modules", function() {
       expect(outer.innerParent.id).toBe([cwd, 'lib/outer.js'].join('/'));
     });
 
+    it("A module should have a children property", function() {
+      var outer = require('./lib/outer');
+      expect(outer.children.length).toBe(1);
+      expect(outer.children[0].id).toBe([cwd, 'lib/sub/inner.js'].join('/'));
+    });
+
   }); // describe Global require()
 
 }); // describe NPM modules
