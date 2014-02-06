@@ -15,26 +15,39 @@
     this.children = [];
     this.filename = null;
     this.loaded = false;
+    self = this;
     
-    if (parent && parent.children) {
-      parent.children.push(this);
+    if (this.parent && this.parent.children) {
+      this.parent.children.push(this);
     }
+    this.require = function(id) {
+      return Require(id, self);
+    };
   }
 
   Module._load = function(file, parent) {
-    var module = new Module(file, parent);
     var body   = Module._readFile(file);
+    var module = new Module(file, parent);
     var dir    = new File(file).getParent();
-    var func   = new Function('exports', 'module', 
-                               '__filename', '__dirname', body);
-    func(module.exports, module, file, dir);
+    var args   = ['exports', 'module', 'require', '__filename', '__dirname'];
+    var func   = new Function(args, body);
+    func.apply(module, [module.exports, module, module.require, file, dir]);
+    module.loaded = true;
     return module.exports;
   };
 
-  Module._resolve = function(id) {
+  Module._resolve = function(id, parent) {
     var name = [id, 'js'].join('.');
-    var file = new File([Require.root, name].join('/'));
+    var root = Module._findRoot(parent);
+    var file = new File([root, name].join('/'));
     return file.exists() ? file.getCanonicalPath() : false;
+  };
+
+  Module._findRoot = function(parent) {
+    if (!parent) { return Require.root; }
+    var pathParts = parent.id.split('/');
+    pathParts.pop();
+    return pathParts.join('/');
   };
 
   Module._readFile = function(filename) {
@@ -46,17 +59,12 @@
     }
   };
 
-  Module.prototype.require = function(path) {
-    return Module._load(path, this);
-  };
-
-  function Require(id) {
-    var file = Module._resolve(id);
-    if (file) { return Module._load(file); }
+  function Require(id, parent) {
+    var file = Module._resolve(id, parent);
+    if (file) { return Module._load(file, parent); }
     throw new Error("Cannot find module " + id);
   }
 
-  Module.require = Require;
   Require.root = System.getProperty('user.dir');
   Require.resolve = Module._resolve;
   Require.cache = {};

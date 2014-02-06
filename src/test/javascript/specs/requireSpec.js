@@ -20,7 +20,7 @@ describe("NPM Modules", function() {
 
     it("should expose DynJS' builtin require() function", function(){
       expect(typeof NativeRequire.require).toBe('function');
-      var f = NativeRequire.require('./native_test_module');
+      var f = NativeRequire.require('./lib/native_test_module');
       expect(f).toBe("Foo!");
     });
 
@@ -50,7 +50,7 @@ describe("NPM Modules", function() {
       NativeRequire.require = function() {
         that.fail("NPM require() should not use DynJS native require");
       };
-      expect(require('./native_test_module')).toBe("Foo!");
+      expect(require('./lib/native_test_module')).toBe("Foo!");
     });
 
     it("should throw an Error if a file can't be found", function() {
@@ -58,23 +58,28 @@ describe("NPM Modules", function() {
     });
 
     it("should have a __dirname property", function() {
-      var top = require('./simple_module');
-      expect(top.dirname).toBe(cwd);
+      var top = require('./lib/simple_module');
+      expect(top.dirname).toBe([cwd, 'lib'].join('/'));
     });
 
     it("should have a __filename property", function() {
-      var top = require('./simple_module');
-      expect(top.filename).toBe([cwd, 'simple_module.js'].join('/'));
+      var top = require('./lib/simple_module');
+      expect(top.filename).toBe([cwd, 'lib/simple_module.js'].join('/'));
     });
 
     it("should not expose private module functions globally", function() {
-      var top = require('./simple_module');
+      var top = require('./lib/simple_module');
       expect(top.privateFunction).toBe(undefined);
     });
 
     it("should support nested requires", function() {
-      var outer = require('outer');
+      var outer = require('./lib/outer');
       expect(outer.quadruple(2)).toBe(8);
+    });
+
+    it("A module should have a parent property", function() {
+      var outer = require('./lib/outer');
+      expect(outer.innerParent.id).toBe([cwd, 'lib/outer.js'].join('/'));
     });
 
   }); // describe Global require()
