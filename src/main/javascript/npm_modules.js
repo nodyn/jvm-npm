@@ -26,7 +26,7 @@
   }
 
   Module._load = function(file, parent) {
-    var body   = Module._readFile(file);
+    var body   = Require._readFile(file);
     var module = new Module(file, parent);
     var dir    = new File(file).getParent();
     var args   = ['exports', 'module', 'require', '__filename', '__dirname'];
@@ -36,21 +36,53 @@
     return module.exports;
   };
 
-  Module._resolve = function(id, parent) {
-    var name = [id, 'js'].join('.');
-    var root = Module._findRoot(parent);
+  function Require(id, parent) {
+    var file = Require.resolve(id, parent);
+
+    if (!file) throw new Error("Cannot find module " + id);
+
+    if (file.endsWith('.js')) { 
+      return Module._load(file, parent); 
+    }
+    else if (file.endsWith('.json')) {
+      try {
+        var body = Require._readFile(file);
+        return JSON.parse(body);
+      } catch(e) {
+        throw new Error("Cannot load JSON file: " + e);
+      }
+    }
+  }
+
+  function normalizeName(fileName, ext) {
+    var extension = ext || '.js';
+    if (fileName.endsWith(extension)) {
+      return fileName;
+    }
+    return fileName + extension;
+  }
+
+  Require.resolve = function(id, parent) {
+    var name = normalizeName(id);
+    var root = Require._findRoot(parent);
     var file = new File([root, name].join('/'));
+    if (file.exists()) {
+      return file.getCanonicalPath();
+    }
+    // See if there is a JSON file instead
+    name = normalizeName(id, '.json');
+    file = new File([root, name].join('/'));
     return file.exists() ? file.getCanonicalPath() : false;
   };
 
-  Module._findRoot = function(parent) {
+  Require._findRoot = function(parent) {
     if (!parent) { return Require.root; }
     var pathParts = parent.id.split('/');
     pathParts.pop();
     return pathParts.join('/');
   };
 
-  Module._readFile = function(filename) {
+  Require._readFile = function(filename) {
     try {
       // TODO: I think this is not very efficient
       return new Scanner(new File(filename)).useDelimiter("\\A").next();
@@ -59,16 +91,16 @@
     }
   };
 
-  function Require(id, parent) {
-    var file = Module._resolve(id, parent);
-    if (file) { return Module._load(file, parent); }
-    throw new Error("Cannot find module " + id);
-  }
-
   Require.root = System.getProperty('user.dir');
-  Require.resolve = Module._resolve;
   Require.cache = {};
   Require.extensions = {};
   require = Require;
+
+  // Helper function until ECMAScript 6 is complete
+  if (typeof String.prototype.endsWith !== 'function') {
+    String.prototype.endsWith = function(suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    };
+  }
 }());
 
