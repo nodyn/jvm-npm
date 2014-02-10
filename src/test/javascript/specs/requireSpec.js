@@ -5,6 +5,10 @@ var cwd = [java.lang.System.getProperty('user.dir'),
 
 require.pushLoadPath(cwd);
 
+beforeEach(function() {
+  require.cache = [];
+});
+
 // Load the NPM module loader into the global scope
 load('src/main/javascript/npm_modules.js');
 
@@ -81,9 +85,15 @@ describe("NPM global require()", function() {
 
   it("should cache modules in require.cache", function() {
     var outer = require('./lib/outer.js');
-    expect(require.cache[outer.filename]).toBe(outer);
+    expect(outer).toBe(require.cache[outer.filename]);
     var outer2 = require('./lib/outer.js');
     expect(outer2).toBe(outer);
+  });
+
+  it("should handle cyclic dependencies", function() {
+    var main = require('./lib/cyclic');
+    expect(main.a.fromA).toBe('Hello from A');
+    expect(main.b.fromB).toBe('Hello from B');
   });
 
   describe("folders as modules", function() {

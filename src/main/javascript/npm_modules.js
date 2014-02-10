@@ -17,28 +17,27 @@
     this.loaded = false;
     self = this;
     
-    if (this.parent && this.parent.children) {
-      this.parent.children.push(this);
+    if (self.parent && self.parent.children) {
+      self.parent.children.push(self);
     }
-    this.require = function(id) {
+
+    self.require = function(id) {
       return Require(id, self);
+    };
+
+    self._load = function() {
+      if (self.loaded) return;
+      var body   = readFile(self.filename),
+          dir    = new File(self.filename).getParent(),
+          args   = ['exports', 'module', 'require', '__filename', '__dirname'],
+          func   = new Function(args, body);
+      func.apply(self, [self.exports, self, self.require, self.filename, dir]);
+      self.loaded = true;
     };
   }
 
-  Module._load = function(file, parent) {
-    var body   = readFile(file),
-        module = new Module(file, parent),
-        dir    = new File(file).getParent(),
-        args   = ['exports', 'module', 'require', '__filename', '__dirname'],
-        func   = new Function(args, body);
-    func.apply(module, [module.exports, module, module.require, file, dir]);
-    module.loaded = true;
-    return module.exports;
-  };
-
   function Require(id, parent) {
-    var file = Require.resolve(id, parent),
-        moduleExports = {};
+    var file = Require.resolve(id, parent);
 
     if (!file) 
       throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
@@ -46,31 +45,30 @@
     if (Require.cache[file]) {
       return Require.cache[file];
     }
+
     if (file.endsWith('.js')) { 
-      moduleExports = Module._load(file, parent); 
-    }
-    else if (file.endsWith('.json')) {
+      var module = new Module(file, parent);
+      // prime the cache in order to support cyclic dependencies
+      Require.cache[module.filename] = module.exports;
+      module._load();
+      Require.cache[module.filename] = module.exports;
+      return module.exports;
+    } else if (file.endsWith('.json')) {
       try {
-        moduleExports = JSON.parse(readFile(file));
+        var json = JSON.parse(readFile(file));
+        Require.cache[file] = json;
+        return json;
       } catch(ex) {
         throw new ModuleError("Cannot load JSON file: " + ex, "PARSE_ERROR");
       }
     }
-    require.cache[file] = moduleExports;
-    return moduleExports;
   }
 
   Require.resolve = function(id, parent) {
     var root = findRoot(parent);
-
-    // Try to load the module as a file
-    var file = resolveAsFile(id, root, '.js');
-    if (file) return file;
-    file = resolveAsFile(id, root, '.json');
-    if (file) return file;
-
-    // OK, no file exists, how about directory?
-    return resolveAsDirectory(id, root);
+    return resolveAsFile(id, root, '.js') || 
+      resolveAsFile(id, root, '.json') || 
+      resolveAsDirectory(id, root);
   };
 
   Require.root = System.getProperty('user.dir');
