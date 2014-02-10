@@ -56,6 +56,11 @@ describe("NPM global require()", function() {
 
   it("should throw an Error if a file can't be found", function() {
     expect(function() {require('./not_found.js');}).toThrow(new Error('Cannot find module ./not_found.js'));
+    try {
+      require('./not_found.js');
+    } catch(e) {
+      expect(e.code).toBe('MODULE_NOT_FOUND');
+    }
   });
 
   it("should support nested requires", function() {
@@ -68,11 +73,27 @@ describe("NPM global require()", function() {
     expect(outer.quadruple(2)).toBe(8);
   });
 
-  describe("requiring JSON files", function() {
-    it("should return the file contents as a JSON object", function() {
-      var json = require('./lib/some_data.json');
-      expect(json.description).toBe("This is a JSON file");
-      expect(json.data).toEqual([1,2,3]);
+  it("should return the a .json file as a JSON object", function() {
+    var json = require('./lib/some_data.json');
+    expect(json.description).toBe("This is a JSON file");
+    expect(json.data).toEqual([1,2,3]);
+  });
+
+  it("should cache modules in require.cache", function() {
+    var outer = require('./lib/outer.js');
+    expect(require.cache[outer.filename]).toBe(outer);
+  });
+
+  describe("folders as modules", function() {
+    it("should find package.json in a module folder", function() {
+      var package = require('./lib/other_package');
+      expect(package.flavor).toBe('cool ranch');
+      expect(package.subdir).toBe([cwd, 'lib/other_package/lib/subdir'].join('/'));
+    });
+
+    it("should find index.js in a directory, if no package.json exists", function() {
+      var package = require('./lib/my_package');
+      expect(package.data).toBe('Hello!');
     });
   });
 
@@ -109,6 +130,11 @@ describe("NPM Module execution context", function() {
     var outer = require('./lib/outer');
     expect(outer.children.length).toBe(1);
     expect(outer.children[0].id).toBe([cwd, 'lib/sub/inner.js'].join('/'));
+  });
+
+  it("should support setting the 'free' exports variable", function() {
+    var modExports = require('./lib/mod_exports');
+    expect(modExports.data).toBe("Hello!");
   });
 
 });
