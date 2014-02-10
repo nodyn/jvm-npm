@@ -82,6 +82,8 @@ describe("NPM global require()", function() {
   it("should cache modules in require.cache", function() {
     var outer = require('./lib/outer.js');
     expect(require.cache[outer.filename]).toBe(outer);
+    var outer2 = require('./lib/outer.js');
+    expect(outer2).toBe(outer);
   });
 
   describe("folders as modules", function() {

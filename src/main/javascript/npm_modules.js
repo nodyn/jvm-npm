@@ -43,6 +43,9 @@
     if (!file) 
       throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
 
+    if (Require.cache[file]) {
+      return Require.cache[file];
+    }
     if (file.endsWith('.js')) { 
       moduleExports = Module._load(file, parent); 
     }
