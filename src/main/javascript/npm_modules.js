@@ -57,12 +57,16 @@
     if (!file) 
       throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
 
-    if (Require.cache[file]) {
-      return Require.cache[file];
-    } else if (file.endsWith('.js')) { 
-      return loadModule(file, parent);
-    } else if (file.endsWith('.json')) {
-      return loadJSON(file);
+    try {
+      if (Require.cache[file]) {
+        return Require.cache[file];
+      } else if (file.endsWith('.js')) { 
+        return loadModule(file, parent);
+      } else if (file.endsWith('.json')) {
+        return loadJSON(file);
+      }
+    } catch(ex) {
+      throw new ModuleError("Cannot load module: " + ex, "LOAD_ERROR");
     }
   }
 
@@ -89,13 +93,9 @@
   }
 
   function loadJSON(file) {
-    try {
-      var json = JSON.parse(readFile(file));
-      Require.cache[file] = json;
-      return json;
-    } catch(ex) {
-      throw new ModuleError("Cannot load JSON file: " + ex, "PARSE_ERROR");
-    }
+    var json = JSON.parse(readFile(file));
+    Require.cache[file] = json;
+    return json;
   }
 
   function resolveAsNodeModule(id, root) {
@@ -108,12 +108,12 @@
   }
 
   function resolveAsDirectory(id, root) {
-    var base = [root, id].join('/');
-    var file = new File([base, 'package.json'].join('/'));
+    var base = [root, id].join('/'),
+        file = new File([base, 'package.json'].join('/'));
     if (file.exists()) {
       try {
-        var body     = readFile(file.getCanonicalPath());
-        var package  = JSON.parse(body);
+        var body = readFile(file.getCanonicalPath()),
+            package  = JSON.parse(body);
         return resolveAsFile(package.main || 'index.js', base);
       } catch(ex) {
         throw new ModuleError("Cannot load JSON file: " + ex, "PARSE_ERROR");
@@ -123,9 +123,7 @@
   }
 
   function resolveAsFile(id, root, ext) {
-    var extension = ext || '.js';
-    var name = normalizeName(id, extension);
-    var file = new File([root, name].join('/'));
+    var file = new File([root, normalizeName(id, ext || '.js')].join('/'));
     return file.exists() ? file.getCanonicalPath() : false;
   }
 
