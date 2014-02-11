@@ -68,13 +68,23 @@
     var root = findRoot(parent);
     return resolveAsFile(id, root, '.js') || 
       resolveAsFile(id, root, '.json') || 
-      resolveAsDirectory(id, root);
+      resolveAsDirectory(id, root) ||
+      resolveAsNodeModule(id, root);
   };
 
   Require.root = System.getProperty('user.dir');
   Require.cache = {};
   Require.extensions = {};
   require = Require;
+
+  function resolveAsNodeModule(id, root) {
+    var base = [root, 'node_modules'].join('/');
+    return resolveAsFile(id, base) ||
+      resolveAsDirectory(id, base) ||
+      ((root != Require.root) ? 
+       resolveAsNodeModule(id, new File(root).getParent()) : 
+       false);
+  }
 
   function resolveAsDirectory(id, root) {
     var base = [root, id].join('/');
@@ -87,7 +97,6 @@
       } catch(ex) {
         throw new ModuleError("Cannot load JSON file: " + ex, "PARSE_ERROR");
       }
-      return file.exists() ? file.getCanonicalPath() : false;
     }
     return resolveAsFile('index.js', base);
   }

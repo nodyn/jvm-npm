@@ -109,6 +109,25 @@ describe("NPM global require()", function() {
     });
   });
 
+  describe("node_modules folders", function() {
+
+    it("should load file modules from the node_modules folder in cwd", function() {
+      var top = require('./lib/a_package');
+      expect(top.file_module).toBe('Hello from a file module');
+    });
+
+    it("should load package modules from the node_modules folder", function() {
+      var top = require('./lib/a_package');
+      expect(top.pkg_module.pkg).toBe('Hello from a package module');
+    });
+
+    it("should find node_module packages in the parent path", function() {
+      var top = require('./lib/a_package');
+      expect(top.pkg_module.file).toBe('Hello from a file module');
+    });
+
+  });
+
 });
 
 describe("NPM Module execution context", function() {
