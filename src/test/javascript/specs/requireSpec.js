@@ -152,6 +152,11 @@ describe("NPM global require()", function() {
       expect(top.pkg_module.file).toBe('Hello from a file module');
     });
 
+    it("should find node_module packages from a sibling path", function() {
+      var top = require('./lib/a_package');
+      expect(top.parent_test.parentChanged).toBe(false);
+    });
+
   });
 
 });

@@ -30,7 +30,7 @@
     this.children = [];
     this.filename = id;
     this.loaded = false;
-    self = this;
+    var self = this;
     
     if (self.parent && self.parent.children) {
       self.parent.children.push(self);
@@ -39,17 +39,18 @@
     self.require = function(id) {
       return Require(id, self);
     };
-
-    self._load = function() {
-      if (self.loaded) return;
-      var body   = readFile(self.filename),
-          dir    = new File(self.filename).getParent(),
-          args   = ['exports', 'module', 'require', '__filename', '__dirname'],
-          func   = new Function(args, body);
-      func.apply(self, [self.exports, self, self.require, self.filename, dir]);
-      self.loaded = true;
-    };
   }
+
+  Module._load = function(module) {
+    if (module.loaded) return;
+    var body   = readFile(module.filename),
+        dir    = new File(module.filename).getParent(),
+        args   = ['exports', 'module', 'require', '__filename', '__dirname'],
+        func   = new Function(args, body);
+    func.apply(module, 
+        [module.exports, module, module.require, module.filename, dir]);
+    module.loaded = true;
+  };
 
   function Require(id, parent) {
     var file = Require.resolve(id, parent);
@@ -92,7 +93,7 @@
     var module = new Module(file, parent);
     // prime the cache in order to support cyclic dependencies
     Require.cache[module.filename] = module.exports;
-    module._load();
+    Module._load(module);
     Require.cache[module.filename] = module.exports;
     return module.exports;
   }
@@ -129,7 +130,11 @@
 
   function resolveAsFile(id, root, ext) {
     var file = new File([root, normalizeName(id, ext || '.js')].join('/'));
-    return file.exists() ? file.getCanonicalPath() : false;
+    //print(">>>>>>>>> LOOKING FOR: " + file.getCanonicalPath());
+    if (file.exists()) {
+    //  print("FOUND");
+      return file.getCanonicalPath();
+    }
   }
 
   function normalizeName(fileName, ext) {
