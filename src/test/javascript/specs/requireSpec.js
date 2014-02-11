@@ -44,6 +44,17 @@ describe("NativeRequire", function() {
       .toBe(true);
   });
 
+  it("should fall back to builtin require() if not found", function() {
+    var called = false;
+    NativeRequire.require = function() {
+      called = true;
+      return "Got native module";
+    };
+    var native = require('not_found');
+    expect(native).toBe("Got native module");
+    expect(called).toBe(true);
+  });
+
 });
 
 describe("NPM global require()", function() {

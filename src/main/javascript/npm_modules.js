@@ -54,8 +54,13 @@
   function Require(id, parent) {
     var file = Require.resolve(id, parent);
 
-    if (!file) 
+    if (!file) {
+      if (typeof NativeRequire.require === 'function') {
+        var native = NativeRequire.require(id);
+        if (native) return native;
+      }
       throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
+    }
 
     try {
       if (Require.cache[file]) {
