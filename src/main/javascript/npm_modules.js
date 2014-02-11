@@ -1,3 +1,18 @@
+/**
+ *  Copyright 2014 Lance Ball
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 // Since we intend to use the Function constructor.
 /* jshint evil: true */
 (function() {
@@ -44,23 +59,10 @@
 
     if (Require.cache[file]) {
       return Require.cache[file];
-    }
-
-    if (file.endsWith('.js')) { 
-      var module = new Module(file, parent);
-      // prime the cache in order to support cyclic dependencies
-      Require.cache[module.filename] = module.exports;
-      module._load();
-      Require.cache[module.filename] = module.exports;
-      return module.exports;
+    } else if (file.endsWith('.js')) { 
+      return loadModule(file, parent);
     } else if (file.endsWith('.json')) {
-      try {
-        var json = JSON.parse(readFile(file));
-        Require.cache[file] = json;
-        return json;
-      } catch(ex) {
-        throw new ModuleError("Cannot load JSON file: " + ex, "PARSE_ERROR");
-      }
+      return loadJSON(file);
     }
   }
 
@@ -76,6 +78,25 @@
   Require.cache = {};
   Require.extensions = {};
   require = Require;
+
+  function loadModule(file, parent) {
+    var module = new Module(file, parent);
+    // prime the cache in order to support cyclic dependencies
+    Require.cache[module.filename] = module.exports;
+    module._load();
+    Require.cache[module.filename] = module.exports;
+    return module.exports;
+  }
+
+  function loadJSON(file) {
+    try {
+      var json = JSON.parse(readFile(file));
+      Require.cache[file] = json;
+      return json;
+    } catch(ex) {
+      throw new ModuleError("Cannot load JSON file: " + ex, "PARSE_ERROR");
+    }
+  }
 
   function resolveAsNodeModule(id, root) {
     var base = [root, 'node_modules'].join('/');
