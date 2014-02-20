@@ -130,9 +130,7 @@
 
   function resolveAsFile(id, root, ext) {
     var file = new File([root, normalizeName(id, ext || '.js')].join('/'));
-    //print(">>>>>>>>> LOOKING FOR: " + file.getCanonicalPath());
     if (file.exists()) {
-    //  print("FOUND");
       return file.getCanonicalPath();
     }
   }
@@ -146,7 +144,7 @@
   }
 
   function findRoot(parent) {
-    if (!parent) { return Require.root; }
+    if (!parent || !parent.id) { return Require.root; }
     var pathParts = parent.id.split('/');
     pathParts.pop();
     return pathParts.join('/');
