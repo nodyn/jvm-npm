@@ -5,7 +5,7 @@
 
   <groupId>org.projectodd</groupId>
   <artifactId>dynjs-npm</artifactId>
-  <version>0.0.1</version>
+  <version>0.1.0-SNAPSHOT</version>
   <url>http://dynjs.org/npm</url>
   <name>dynjs-npm</name>
 
