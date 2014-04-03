@@ -212,7 +212,17 @@ describe("module isolation", function() {
     } catch (err) {
       expect( err instanceof ReferenceError ).toBe(true);
     }
+  });
 
+  it("should not leak function declarations", function() {
+    var top = require('./lib/isolation/module-c.js');
+    try {
+      var shouldFail = doNotLeak;
+      // should have thrown
+      expect(true).toBe(false);
+    } catch (err) {
+      expect( err instanceof ReferenceError ).toBe(true);
+    }
   });
 });
 
