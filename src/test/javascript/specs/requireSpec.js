@@ -201,4 +201,18 @@ describe("NPM Module execution context", function() {
 
 });
 
+describe("module isolation", function() {
+  it("should expose global variables and not expose 'var' declared variables", function() {
+    var top = require( './lib/isolation/module-a.js');
+    expect(doLeak).toBe("cheddar");
+    try {
+      var shouldFail = doNotLeak;
+      // should have thrown
+      expect(true).toBe(false);
+    } catch (err) {
+      expect( err instanceof ReferenceError ).toBe(true);
+    }
+
+  });
+});
 
