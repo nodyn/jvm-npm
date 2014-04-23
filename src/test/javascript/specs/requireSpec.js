@@ -226,3 +226,14 @@ describe("module isolation", function() {
   });
 });
 
+describe("cyclic with replacement of module.exports", function() {
+  it( "should have the same sense of an object in all places", function() {
+    var Stream = require( "./lib/cyclic2/stream.js" );
+
+    expect( typeof Stream ).toBe( "function"  );
+    expect( typeof Stream.Readable ).toBe( "function" );
+    expect( typeof Stream.Readable.Stream ).toBe( "function" );
+
+  });
+});
+
