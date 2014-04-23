@@ -16,8 +16,7 @@
 // Since we intend to use the Function constructor.
 /* jshint evil: true */
 (function() {
-  // Keep a reference to DynJS's builtin require()
-  NativeRequire = { require: require };
+  NativeRequire = { require: typeof require === 'function' ?  require : load };
 
   var System  = java.lang.System,
       Scanner = java.util.Scanner,
@@ -25,6 +24,12 @@
 
   function Module(id, parent) {
     this.id = id;
+    this.parent = parent;
+    this.children = [];
+    this.filename = id;
+    this.loaded = false;
+    var self = this;
+    
     Object.defineProperty( this, 'exports', {
       get: function() {
         return this._exports;
@@ -34,14 +39,8 @@
         this._exports = val;
       }.bind(this),
     } );
-
     this.exports = {};
-    this.parent = parent;
-    this.children = [];
-    this.filename = id;
-    this.loaded = false;
-    var self = this;
-    
+
     if (self.parent && self.parent.children) {
       self.parent.children.push(self);
     }
@@ -67,6 +66,9 @@
 
     if (!file) {
       if (typeof NativeRequire.require === 'function') {
+        if (Require.debug) {
+          print(['Cannot resolve', id, 'defaulting to native'].join(' '));
+        }
         var native = NativeRequire.require(id);
         if (native) return native;
       }
@@ -86,6 +88,8 @@
     }
   }
 
+  Require.debug = false;
+
   Require.resolve = function(id, parent) {
     var root = findRoot(parent);
     return resolveAsFile(id, root, '.js') || 
@@ -101,8 +105,6 @@
 
   function loadModule(file, parent) {
     var module = new Module(file, parent);
-    // prime the cache in order to support cyclic dependencies
-    Require.cache[module.filename] = module.exports;
     Module._load(module);
     return module.exports;
   }
