@@ -25,6 +25,16 @@
 
   function Module(id, parent) {
     this.id = id;
+    Object.defineProperty( this, 'exports', {
+      get: function() {
+        return this._exports;
+      }.bind(this),
+      set: function(val) {
+        Require.cache[this.filename] = val;
+        this._exports = val;
+      }.bind(this),
+    } );
+
     this.exports = {};
     this.parent = parent;
     this.children = [];
@@ -94,7 +104,6 @@
     // prime the cache in order to support cyclic dependencies
     Require.cache[module.filename] = module.exports;
     Module._load(module);
-    Require.cache[module.filename] = module.exports;
     return module.exports;
   }
 
