@@ -17,7 +17,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.dynjs>0.2.2</version.dynjs>
+    <version.dynjs>0.2.3-SNAPSHOT</version.dynjs>
     <version.jasmine-cli>0.0.12</version.jasmine-cli>
   </properties>
 
@@ -121,11 +121,16 @@
             <configuration>
               <mainClass>org.jasmine.cli.Main</mainClass>
               <classpathScope>test</classpathScope>
+              <systemPropertyVariables>
+                <dynjs.compile.mode>OFF</dynjs.compile.mode>
+              </systemPropertyVariables>
               <arguments>
                 <argument>--pattern</argument>
                 <argument>./src/test/javascript/**/*Spec.js</argument>
                 <argument>--format</argument>
                 <argument>DOC</argument>
+                <argument>--compile-mode</argument>
+                <argument>OFF</argument>
               </arguments>
             </configuration>
           </execution>
