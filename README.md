@@ -25,4 +25,7 @@ Or with Nashorn:
     nashorn> load('./npm_modules.js');
     nashorn> var x = require('some_module');
 
-
+See the `examples` directory for simple, runnable usage examples.
+Again, this will only work out of the box for pure JS NPM modules.
+Anything that depends on the Node.js API will not work with just
+this file.
