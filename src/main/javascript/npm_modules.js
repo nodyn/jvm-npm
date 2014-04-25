@@ -22,8 +22,9 @@
       Scanner = java.util.Scanner,
       File    = java.io.File;
 
-  function Module(id, parent) {
+  function Module(id, parent, core) {
     this.id = id;
+    this.core = core;
     this.parent = parent;
     this.children = [];
     this.filename = id;
@@ -52,7 +53,7 @@
 
   Module._load = function(module) {
     if (module.loaded) return;
-    var body   = readFile(module.filename),
+    var body   = readFile(module.filename, module.core),
         dir    = new File(module.filename).getParent(),
         args   = ['exports', 'module', 'require', '__filename', '__dirname'],
         func   = new Function(args, body);
@@ -62,49 +63,54 @@
   };
 
   function Require(id, parent) {
-    var file = Require.resolve(id, parent);
+    var core, native, file = Require.resolve(id, parent);
 
     if (!file) {
       if (typeof NativeRequire.require === 'function') {
         if (Require.debug) {
           print(['Cannot resolve', id, 'defaulting to native'].join(' '));
         }
-        var native = NativeRequire.require(id);
+        native = NativeRequire.require(id);
         if (native) return native;
       }
       throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
     }
 
+    if (file.core) {
+      file = file.path;
+      core = true;
+    }
     try {
       if (Require.cache[file]) {
         return Require.cache[file];
       } else if (file.endsWith('.js')) { 
-        return loadModule(file, parent);
+        return loadModule(file, parent, core);
       } else if (file.endsWith('.json')) {
         return loadJSON(file);
       }
     } catch(ex) {
-      throw new ModuleError("Cannot load module: " + ex, "LOAD_ERROR");
+      throw new ModuleError("Cannot load module", "LOAD_ERROR", ex);
     }
   }
 
-  Require.debug = false;
-
   Require.resolve = function(id, parent) {
     var root = findRoot(parent);
-    return resolveAsFile(id, root, '.js') || 
+    return resolveCoreModule(id, root) ||
+      resolveAsFile(id, root, '.js')   || 
       resolveAsFile(id, root, '.json') || 
-      resolveAsDirectory(id, root) ||
+      resolveAsDirectory(id, root)     ||
       resolveAsNodeModule(id, root);
   };
 
   Require.root = System.getProperty('user.dir');
+
+  Require.debug = false;
   Require.cache = {};
   Require.extensions = {};
   require = Require;
 
-  function loadModule(file, parent) {
-    var module = new Module(file, parent);
+  function loadModule(file, parent, core) {
+    var module = new Module(file, parent, core);
     Module._load(module);
     return module.exports;
   }
@@ -133,7 +139,7 @@
             package  = JSON.parse(body);
         return resolveAsFile(package.main || 'index.js', base);
       } catch(ex) {
-        throw new ModuleError("Cannot load JSON file: " + ex, "PARSE_ERROR");
+        throw new ModuleError("Cannot load JSON file", "PARSE_ERROR", ex);
       }
     }
     return resolveAsFile('index.js', base);
@@ -144,6 +150,13 @@
     if (file.exists()) {
       return file.getCanonicalPath();
     }
+  }
+
+  function resolveCoreModule(id, root) {
+    var name = normalizeName(id);
+    var classloader = java.lang.Thread.currentThread().getContextClassLoader();
+    if (classloader.findResource(name))
+        return { path: name, core: true };
   }
 
   function normalizeName(fileName, ext) {
@@ -161,18 +174,26 @@
     return pathParts.join('/');
   }
 
-  function readFile(filename) {
+  function readFile(filename, core) {
+    var input;
     try {
+      if (core) {
+        var classloader = java.lang.Thread.currentThread().getContextClassLoader();
+        input = classloader.getResourceAsStream(filename);
+      } else {
+        input = new File(filename);
+      }
       // TODO: I think this is not very efficient
-      return new Scanner(new File(filename)).useDelimiter("\\A").next();
+      return new Scanner(input).useDelimiter("\\A").next();
     } catch(e) {
-      throw new ModuleError("Cannot read file ["+file+"]: " + e, "IO_ERROR");
+      throw new ModuleError("Cannot read file ["+input+"]: ", "IO_ERROR", e);
     }
   }
 
-  function ModuleError(message, code) {
+  function ModuleError(message, code, cause) {
     this.code = code || "UNDEFINED";
     this.message = message || "Error loading module";
+    this.cause = cause;
   }
 
   // Helper function until ECMAScript 6 is complete

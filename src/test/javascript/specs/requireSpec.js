@@ -15,20 +15,23 @@
  */
 // Make the native require function look in our local directory
 // for modules loaded with NativeRequire.require()
+
 var cwd = [java.lang.System.getProperty('user.dir'), 
            'src/test/javascript/specs'].join('/');
 
 require.pushLoadPath(cwd);
 
-beforeEach(function() {
-  require.cache = [];
-});
-
 // Load the NPM module loader into the global scope
 load('src/main/javascript/npm_modules.js');
 
+
 // Tell require where it's root is
 require.root = cwd;
+
+
+beforeEach(function() {
+  require.cache = [];
+});
 
 describe("NativeRequire", function() {
 
@@ -236,4 +239,21 @@ describe("cyclic with replacement of module.exports", function() {
 
   });
 });
+
+describe("Core modules", function() {
+  it("should be found on the classpath", function() {
+    var core = require('core');
+    expect(core).not.toBeFalsy();
+  });
+
+  it( "should have the same sense of an object in all places", function() {
+    var Core = require( "core.js" );
+
+    expect( typeof Core ).toBe( "function"  );
+    expect( typeof Core.Child ).toBe( "function" );
+    expect( typeof Core.Child.Core ).toBe( "function" );
+
+  });
+});
+
 
