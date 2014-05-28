@@ -30,7 +30,7 @@
     this.filename = id;
     this.loaded = false;
     var self = this;
-    
+
     Object.defineProperty( this, 'exports', {
       get: function() {
         return this._exports;
@@ -57,7 +57,7 @@
         dir    = new File(module.filename).getParent(),
         args   = ['exports', 'module', 'require', '__filename', '__dirname'],
         func   = new Function(args, body);
-    func.apply(module, 
+    func.apply(module,
         [module.exports, module, module.require, module.filename, dir]);
     module.loaded = true;
   };
@@ -83,7 +83,7 @@
     try {
       if (Require.cache[file]) {
         return Require.cache[file];
-      } else if (file.endsWith('.js')) { 
+      } else if (file.endsWith('.js')) {
         return loadModule(file, parent, core);
       } else if (file.endsWith('.json')) {
         return loadJSON(file);
@@ -96,8 +96,8 @@
   Require.resolve = function(id, parent) {
     var root = findRoot(parent);
     return resolveCoreModule(id, root) ||
-      resolveAsFile(id, root, '.js')   || 
-      resolveAsFile(id, root, '.json') || 
+      resolveAsFile(id, root, '.js')   ||
+      resolveAsFile(id, root, '.json') ||
       resolveAsDirectory(id, root)     ||
       resolveAsNodeModule(id, root);
   };
@@ -125,8 +125,8 @@
     var base = [root, 'node_modules'].join('/');
     return resolveAsFile(id, base) ||
       resolveAsDirectory(id, base) ||
-      ((root != Require.root) ? 
-       resolveAsNodeModule(id, new File(root).getParent()) : 
+      ((root != Require.root) ?
+       resolveAsNodeModule(id, new File(root).getParent()) :
        false);
   }
 
@@ -137,7 +137,12 @@
       try {
         var body = readFile(file.getCanonicalPath()),
             package  = JSON.parse(body);
-        return resolveAsFile(package.main || 'index.js', base);
+        if (package.main) {
+          return (resolveAsFile(package.main, base) ||
+                  resolveAsDirectory(package.main, base));
+        }
+        // if no package.main exists, look for index.js
+        return resolveAsFile('index.js', base);
       } catch(ex) {
         throw new ModuleError("Cannot load JSON file", "PARSE_ERROR", ex);
       }
@@ -207,4 +212,3 @@
   ModuleError.prototype = new Error();
   ModuleError.prototype.constructor = ModuleError;
 }());
-

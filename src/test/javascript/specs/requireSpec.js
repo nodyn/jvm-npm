@@ -16,7 +16,7 @@
 // Make the native require function look in our local directory
 // for modules loaded with NativeRequire.require()
 
-var cwd = [java.lang.System.getProperty('user.dir'), 
+var cwd = [java.lang.System.getProperty('user.dir'),
            'src/test/javascript/specs'].join('/');
 
 require.pushLoadPath(cwd);
@@ -130,6 +130,11 @@ describe("NPM global require()", function() {
       var package = require('./lib/other_package');
       expect(package.flavor).toBe('cool ranch');
       expect(package.subdir).toBe([cwd, 'lib/other_package/lib/subdir'].join('/'));
+    });
+
+    it('should load package.json main property even if it is a directory', function() {
+      var cheese = require('./lib/cheese');
+      expect(cheese.flavor).toBe('nacho');
     });
 
     it("should find index.js in a directory, if no package.json exists", function() {
@@ -255,5 +260,3 @@ describe("Core modules", function() {
 
   });
 });
-
-
