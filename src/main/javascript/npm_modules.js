@@ -137,7 +137,7 @@
       try {
         var body = readFile(file.getCanonicalPath()),
             package  = JSON.parse(body);
-        return resolveAsFile(package.main || 'index.js', base);
+        return resolveAsFile(package.main || 'index.js', base, '/');
       } catch(ex) {
         throw new ModuleError("Cannot load JSON file", "PARSE_ERROR", ex);
       }
@@ -207,4 +207,3 @@
   ModuleError.prototype = new Error();
   ModuleError.prototype.constructor = ModuleError;
 }());
-
