@@ -165,6 +165,11 @@ describe("NPM global require()", function() {
       expect(top.parent_test.parentChanged).toBe(false);
     });
 
+    it('should find node_module packages all the way up above cwd', function() {
+      var m = require('root_module');
+      expect(m.message).toBe('You are at the root');
+    });
+
   });
 
 });

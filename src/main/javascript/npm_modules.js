@@ -125,9 +125,7 @@
     var base = [root, 'node_modules'].join('/');
     return resolveAsFile(id, base) ||
       resolveAsDirectory(id, base) ||
-      ((root != Require.root) ?
-       resolveAsNodeModule(id, new File(root).getParent()) :
-       false);
+      (root ? resolveAsNodeModule(id, new File(root).getParent()) : false);
   }
 
   function resolveAsDirectory(id, root) {
