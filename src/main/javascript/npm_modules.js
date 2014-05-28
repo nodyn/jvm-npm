@@ -89,7 +89,7 @@
         return loadJSON(file);
       }
     } catch(ex) {
-      throw new ModuleError("Cannot load module", "LOAD_ERROR", ex);
+      throw new ModuleError("Cannot load module " + id, "LOAD_ERROR", ex);
     }
   }
 
