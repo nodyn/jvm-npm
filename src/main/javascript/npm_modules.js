@@ -125,7 +125,7 @@
     var base = [root, 'node_modules'].join('/');
     return resolveAsFile(id, base) ||
       resolveAsDirectory(id, base) ||
-      ((root != Require.root) ? 
+      (root ? 
        resolveAsNodeModule(id, new File(root).getParent()) : 
        false);
   }
@@ -207,4 +207,3 @@
   ModuleError.prototype = new Error();
   ModuleError.prototype.constructor = ModuleError;
 }());
-
