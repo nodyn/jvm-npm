@@ -94,7 +94,7 @@
   }
 
   Require.resolve = function(id, parent) {
-    var roots = [ findRoot(parent) ];
+    var roots = findRoots(parent);
     for ( var i = 0 ; i < roots.length ; ++i ) {
       var root = roots[i];
       var result = resolveCoreModule(id, root) ||
@@ -112,7 +112,7 @@
   Require.root = System.getProperty('user.dir');
   Require.NODE_PATH = undefined;
 
-  function roots(parent) {
+  function findRoots(parent) {
     var r = [];
     r.push( findRoot( parent ) );
     return r.concat( Require.paths() );
