@@ -22,7 +22,7 @@ var cwd = [java.lang.System.getProperty('user.dir'),
 require.pushLoadPath(cwd);
 
 // Load the NPM module loader into the global scope
-load('src/main/javascript/npm_modules.js');
+load('src/main/javascript/jvm-npm.js');
 
 
 // Tell require where it's root is

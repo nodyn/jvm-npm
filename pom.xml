@@ -97,7 +97,7 @@
             <configuration>
               <artifacts>
                 <artifact>
-                  <file>target/classes/npm_modules.js</file>
+                  <file>target/classes/jvm-npm.js</file>
                   <type>js</type>
                 </artifact>
               </artifacts>
