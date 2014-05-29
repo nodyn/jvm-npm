@@ -4,10 +4,10 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.projectodd</groupId>
+  <groupId>io.nodyn</groupId>
   <artifactId>jvm-npm</artifactId>
   <version>0.1.0-SNAPSHOT</version>
-  <url>http://github.com/projectodd/jvm-npm</url>
+  <url>http://github.com/nodyn/jvm-npm</url>
   <name>jvm-npm</name>
 
   <parent>
@@ -32,9 +32,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:projectodd/jvm-npm.git</connection>
-    <developerConnection>scm:git:git@github.com:projectodd/jvm-npm.git</developerConnection>
-    <url>git@github.com:projectodd/jvm-npm.git</url>
+    <connection>scm:git:git@github.com:nodyn/jvm-npm.git</connection>
+    <developerConnection>scm:git:git@github.com:nodyn/jvm-npm.git</developerConnection>
+    <url>git@github.com:nodyn/jvm-npm.git</url>
     <tag>HEAD</tag>
   </scm>
 
@@ -78,6 +78,26 @@
       </resource>
     </resources>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>target/classes/npm_modules.js</file>
+                  <type>js</type>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
