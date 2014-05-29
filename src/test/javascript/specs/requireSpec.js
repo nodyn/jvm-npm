@@ -19,6 +19,8 @@
 var cwd = [java.lang.System.getProperty('user.dir'),
            'src/test/javascript/specs'].join('/');
 
+var home = java.lang.System.getProperty('user.home');
+
 require.pushLoadPath(cwd);
 
 // Load the NPM module loader into the global scope
@@ -265,3 +267,16 @@ describe("Core modules", function() {
 
   });
 });
+
+describe("Path management", function() {
+  it( "should respect NODE_PATH variable", function() {
+    require.NODE_PATH = 'foo:bar';
+    var results = require.paths();
+    expect( results[0] ).toBe( home + "/.node_modules" );
+    expect( results[1] ).toBe( home + "/.node_libraries" );
+    expect( results[2] ).toBe( 'foo' );
+    expect( results[3] ).toBe( 'bar' );
+    //java.lang.System.err.println( results );
+
+  });
+})

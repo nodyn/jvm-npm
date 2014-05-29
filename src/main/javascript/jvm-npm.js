@@ -94,15 +94,72 @@
   }
 
   Require.resolve = function(id, parent) {
-    var root = findRoot(parent);
-    return resolveCoreModule(id, root) ||
-      resolveAsFile(id, root, '.js')   ||
-      resolveAsFile(id, root, '.json') ||
-      resolveAsDirectory(id, root)     ||
-      resolveAsNodeModule(id, root);
+    var roots = [ findRoot(parent) ];
+    for ( var i = 0 ; i < roots.length ; ++i ) {
+      var root = roots[i];
+      var result = resolveCoreModule(id, root) ||
+        resolveAsFile(id, root, '.js')   ||
+        resolveAsFile(id, root, '.json') ||
+        resolveAsDirectory(id, root)     ||
+        resolveAsNodeModule(id, root);
+      if ( result ) {
+        return result;
+      }
+    }
+    return false;
   };
 
   Require.root = System.getProperty('user.dir');
+  Require.NODE_PATH = undefined;
+
+  function roots(parent) {
+    var r = [];
+    r.push( findRoot( parent ) );
+    return r.concat( Require.paths() );
+  }
+
+  function parsePaths(paths) {
+    if ( ! paths ) {
+      return [];
+    }
+    if ( paths === '' ) {
+      return [];
+    }
+    var osName = java.lang.System.getProperty("os.name").toLowerCase();
+    var separator;
+
+    if ( osName.indexOf( 'win' ) >= 0 ) {
+      separator = ';';
+    } else {
+      separator = ':';
+    }
+
+    return paths.split( separator );
+  }
+
+  Require.paths = function() {
+    var r = [];
+    r.push( java.lang.System.getProperty( "user.home" ) + "/.node_modules" );
+    r.push( java.lang.System.getProperty( "user.home" ) + "/.node_libraries" );
+
+    if ( Require.NODE_PATH ) {
+      r = r.concat( parsePaths( Require.NODE_PATH ) );
+    } else {
+      var NODE_PATH = java.lang.System.getenv.NODE_PATH;
+      if ( NODE_PATH ) {
+        r = r.concat( parsePaths( NODE_PATH ) );
+      }
+    }
+    // r.push( $PREFIX + "/node/library" );
+    return r;
+  }
+
+  function findRoot(parent) {
+    if (!parent || !parent.id) { return Require.root; }
+    var pathParts = parent.id.split('/');
+    pathParts.pop();
+    return pathParts.join('/');
+  }
 
   Require.debug = false;
   Require.cache = {};
@@ -170,12 +227,7 @@
     return fileName + extension;
   }
 
-  function findRoot(parent) {
-    if (!parent || !parent.id) { return Require.root; }
-    var pathParts = parent.id.split('/');
-    pathParts.pop();
-    return pathParts.join('/');
-  }
+
 
   function readFile(filename, core) {
     var input;
