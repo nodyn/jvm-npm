@@ -53,6 +53,7 @@
 
   Module._load = function(module) {
     if (module.loaded) return;
+    var __FILENAME__ = module.filename;
     var body   = readFile(module.filename, module.core),
         dir    = new File(module.filename).getParent(),
         args   = ['exports', 'module', 'require', '__filename', '__dirname'],
