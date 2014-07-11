@@ -207,7 +207,12 @@
   }
 
   function resolveAsFile(id, root, ext) {
-    var file = new File([root, normalizeName(id, ext || '.js')].join('/'));
+    var file;
+    if ( id.indexOf('/') == 0 ) {
+      file = new File(normalizeName(id, ext || '.js'));
+    } else {
+      file = new File([root, normalizeName(id, ext || '.js')].join('/'));
+    }
     if (file.exists()) {
       return file.getCanonicalPath();
     }
