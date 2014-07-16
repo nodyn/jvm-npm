@@ -29,7 +29,6 @@
     this.children = [];
     this.filename = id;
     this.loaded = false;
-    var self = this;
 
     Object.defineProperty( this, 'exports', {
       get: function() {
@@ -42,17 +41,15 @@
     } );
     this.exports = {};
 
-    if (self.parent && self.parent.children) {
-      self.parent.children.push(self);
-    }
+    if (parent && parent.children) parent.children.push(this);
 
-    self.require = function(id) {
-      return Require(id, self);
-    };
+    this.require = function(id) {
+      return Require(id, this);
+    }.bind(this);
   }
 
-  Module._load = function(module) {
-    if (module.loaded) return;
+  Module._load = function _load(file, parent, core, main) {
+    var module = new Module(file, parent, core);
     var __FILENAME__ = module.filename;
     var body   = readFile(module.filename, module.core),
         dir    = new File(module.filename).getParent(),
@@ -61,7 +58,19 @@
     func.apply(module,
         [module.exports, module, module.require, module.filename, dir]);
     module.loaded = true;
+    module.main = main;
+    return module.exports;
   };
+
+  Module.runMain = function runMain(main) {
+    var file = Require.resolve(main);
+    Module._load(file, undefined, false, true);
+  };
+
+  // This file can be loaded using require('module')
+  // to get the Module module
+  module = module || {};
+  module.exports = Module;
 
   function Require(id, parent) {
     var core, native, file = Require.resolve(id, parent);
@@ -69,7 +78,7 @@
     if (!file) {
       if (typeof NativeRequire.require === 'function') {
         if (Require.debug) {
-          print(['Cannot resolve', id, 'defaulting to native'].join(' '));
+          System.out.println(['Cannot resolve', id, 'defaulting to native'].join(' '));
         }
         native = NativeRequire.require(id);
         if (native) return native;
@@ -85,7 +94,7 @@
       if (Require.cache[file]) {
         return Require.cache[file];
       } else if (file.endsWith('.js')) {
-        return loadModule(file, parent, core);
+        return Module._load(file, parent, core);
       } else if (file.endsWith('.json')) {
         return loadJSON(file);
       }
@@ -153,7 +162,7 @@
     }
     // r.push( $PREFIX + "/node/library" );
     return r;
-  }
+  };
 
   function findRoot(parent) {
     if (!parent || !parent.id) { return Require.root; }
@@ -166,12 +175,6 @@
   Require.cache = {};
   Require.extensions = {};
   require = Require;
-
-  function loadModule(file, parent, core) {
-    var module = new Module(file, parent, core);
-    Module._load(module);
-    return module.exports;
-  }
 
   function loadJSON(file) {
     var json = JSON.parse(readFile(file));
@@ -208,8 +211,11 @@
 
   function resolveAsFile(id, root, ext) {
     var file;
-    if ( id.indexOf('/') == 0 ) {
+    if ( id.indexOf('/') === 0 ) {
       file = new File(normalizeName(id, ext || '.js'));
+      if (!file.exists()) {
+        return resolveAsDirectory(id);
+      }
     } else {
       file = new File([root, normalizeName(id, ext || '.js')].join('/'));
     }
@@ -232,8 +238,6 @@
     }
     return fileName + extension;
   }
-
-
 
   function readFile(filename, core) {
     var input;

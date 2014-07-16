@@ -279,4 +279,16 @@ describe("Path management", function() {
     //java.lang.System.err.println( results );
 
   });
-})
+});
+
+describe("The Module module", function() {
+  it('should exist', function() {
+    var Module = require('jvm-npm');
+    expect(Module).toBeTruthy();
+  });
+
+  it('should have a runMain function', function() {
+    var Module = require('jvm-npm');
+    expect(typeof Module.runMain).toBe('function');
+  });
+});
