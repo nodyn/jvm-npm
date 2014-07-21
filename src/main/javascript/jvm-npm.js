@@ -16,11 +16,14 @@
 // Since we intend to use the Function constructor.
 /* jshint evil: true */
 (function() {
-  NativeRequire = { require: typeof require === 'function' ?  require : load };
-
   var System  = java.lang.System,
       Scanner = java.util.Scanner,
       File    = java.io.File;
+
+  NativeRequire = (typeof NativeRequire === 'undefined') ? {} : NativeRequire;
+  if (typeof require === 'function' && !NativeRequire.require) {
+    NativeRequire.require = require;
+  }
 
   function Module(id, parent, core) {
     this.id = id;
@@ -67,11 +70,6 @@
     Module._load(file, undefined, false, true);
   };
 
-  // This file can be loaded using require('module')
-  // to get the Module module
-  module = module || {};
-  module.exports = Module;
-
   function Require(id, parent) {
     var core, native, file = Require.resolve(id, parent);
 
@@ -82,6 +80,7 @@
         }
         native = NativeRequire.require(id);
         if (native) return native;
+        System.err.println("Cannot find module " + id);
       }
       throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
     }
@@ -171,10 +170,13 @@
     return pathParts.join('/');
   }
 
-  Require.debug = false;
+  Require.debug = true;
   Require.cache = {};
   Require.extensions = {};
   require = Require;
+
+  module.exports = Module;
+
 
   function loadJSON(file) {
     var json = JSON.parse(readFile(file));
@@ -271,4 +273,5 @@
 
   ModuleError.prototype = new Error();
   ModuleError.prototype.constructor = ModuleError;
+
 }());
