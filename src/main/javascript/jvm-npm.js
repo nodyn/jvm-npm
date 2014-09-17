@@ -15,6 +15,9 @@
  */
 // Since we intend to use the Function constructor.
 /* jshint evil: true */
+
+module = (typeof module == 'undefined') ? {} :  module;
+
 (function() {
   var System  = java.lang.System,
       Scanner = java.util.Scanner,

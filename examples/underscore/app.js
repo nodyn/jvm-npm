@@ -1,4 +1,4 @@
-load('./lib/npm_modules.js');
+load('../../src/main/javascript/jvm-npm.js');
 var _ = require('underscore');
 
 print('Here we do some stuff with underscore');
