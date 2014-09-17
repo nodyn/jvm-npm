@@ -15,15 +15,18 @@ on Nashorn, and should work with Rhino as well.
 ## Usage
 
 Using the global `load()` functions supplied by DynJS, Nashorn and
-Rhino, load `npm_modules.js` into the global execution context:
+Rhino, load `jvm-npm.js` into the global execution context:
 
-    dynjs> load('./npm_modules.js');
+    dynjs> load('./jvm-npm.js');
     dynjs> var x = require('some_module');
 
 Or with Nashorn:
 
-    nashorn> load('./npm_modules.js');
+    nashorn> load('./jvm-npm.js');
     nashorn> var x = require('some_module');
+    
+Of course, you will need to ensure that the jvm-npm.js file exists
+in the current directory.
 
 See the `examples` directory for simple, runnable usage examples.
 Again, this will only work out of the box for pure JS NPM modules.
