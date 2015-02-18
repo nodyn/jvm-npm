@@ -97,6 +97,15 @@ describe("NPM global require()", function() {
     }
   });
 
+  it("should not wrap errors encountered when loading a module", function() {
+    try {
+      require('./lib/throws');
+    } catch(ex) {
+      print(ex);
+      expect(ex instanceof ReferenceError).toBeTruthy();
+    }
+  });
+
   it("should support nested requires", function() {
     var outer = require('./lib/outer');
     expect(outer.quadruple(2)).toBe(8);

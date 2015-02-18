@@ -101,7 +101,9 @@ module = (typeof module == 'undefined') ? {} :  module;
         return loadJSON(file);
       }
     } catch(ex) {
-      throw new ModuleError("Cannot load module " + id, "LOAD_ERROR", ex);
+      if (ex instanceof java.lang.Exception)
+        throw new ModuleError("Cannot load module " + id, "LOAD_ERROR", ex);
+      else throw ex;
     }
   }
 
