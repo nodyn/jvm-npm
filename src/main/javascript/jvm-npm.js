@@ -218,7 +218,7 @@ module = (typeof module == 'undefined') ? {} :  module;
 
   function resolveAsFile(id, root, ext) {
     var file;
-    if ( id.indexOf('/') === 0 ) {
+    if ( id.length > 0 && id[0] === '/' ) {
       file = new File(normalizeName(id, ext || '.js'));
       if (!file.exists()) {
         return resolveAsDirectory(id);
