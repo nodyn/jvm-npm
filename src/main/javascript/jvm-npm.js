@@ -83,8 +83,8 @@ module = (typeof module == 'undefined') ? {} :  module;
         }
         native = NativeRequire.require(id);
         if (native) return native;
-        System.err.println("Cannot find module " + id);
       }
+      System.err.println("Cannot find module " + id);
       throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
     }
 
@@ -101,9 +101,12 @@ module = (typeof module == 'undefined') ? {} :  module;
         return loadJSON(file);
       }
     } catch(ex) {
-      if (ex instanceof java.lang.Exception)
+      if (ex instanceof java.lang.Exception) {
         throw new ModuleError("Cannot load module " + id, "LOAD_ERROR", ex);
-      else throw ex;
+      } else {
+        System.out.println("Cannot load module " + id + " LOAD_ERROR");
+        throw ex;
+      }
     }
   }
 
