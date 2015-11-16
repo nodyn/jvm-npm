@@ -237,7 +237,7 @@ module = (typeof module == 'undefined') ? {} :  module;
   function resolveCoreModule(id, root) {
     var name = normalizeName(id);
     var classloader = java.lang.Thread.currentThread().getContextClassLoader();
-    if (classloader.findResource(name))
+    if (classloader.getResource(name))
         return { path: name, core: true };
   }
 
