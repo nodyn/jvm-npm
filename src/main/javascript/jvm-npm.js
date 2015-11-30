@@ -173,7 +173,7 @@ module = (typeof module == 'undefined') ? {} :  module;
 
   function findRoot(parent) {
     if (!parent || !parent.id) { return Require.root; }
-    var pathParts = parent.id.split('/');
+    var pathParts = parent.id.split(/[\/|\\,]+/g);
     pathParts.pop();
     return pathParts.join('/');
   }
