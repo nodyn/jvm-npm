@@ -215,8 +215,9 @@ module = (typeof module == 'undefined') ? {} :  module;
       } catch(ex) {
         throw new ModuleError("Cannot load JSON file", "PARSE_ERROR", ex);
       }
-    }
-    return resolveAsFile('index.js', base);
+    }   
+    return resolveCoreModule([id, 'index.js'].join('/'), root) ||
+      resolveAsFile('index.js', base);
   }
 
   function resolveAsFile(id, root, ext) {
@@ -232,6 +233,10 @@ module = (typeof module == 'undefined') ? {} :  module;
     if (file.exists()) {
       return file.getCanonicalPath();
     }
+    var result = resolveCoreModule(id, root);
+    if ( result ) {
+      return result;
+    }
   }
 
   function resolveCoreModule(id, root) {
@@ -239,6 +244,13 @@ module = (typeof module == 'undefined') ? {} :  module;
     var classloader = java.lang.Thread.currentThread().getContextClassLoader();
     if (classloader.getResource(name))
         return { path: name, core: true };
+    if(name.startsWith('./'))
+      name = name.substring(2);
+    if (classloader.getResource(name))
+        return { path: name, core: true };
+    var path = [root, name].join('/');
+    if (classloader.getResource(path))
+        return { path: path, core: true };
   }
 
   function normalizeName(fileName, ext) {
