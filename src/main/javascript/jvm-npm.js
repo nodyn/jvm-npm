@@ -244,7 +244,7 @@ module = (typeof module == 'undefined') ? {} :  module;
     var classloader = java.lang.Thread.currentThread().getContextClassLoader();
     if (classloader.getResource(name))
         return { path: name, core: true };
-    if(name.startsWith('./'))
+    if(name.indexOf('./',0)==0)
       name = name.substring(2);
     if (classloader.getResource(name))
         return { path: name, core: true };
