@@ -258,8 +258,16 @@ module = (typeof module == 'undefined') ? {} :  module;
       } else {
         input = new File(filename);
       }
-      // TODO: I think this is not very efficient
-      return new Scanner(input).useDelimiter("\\A").next();
+      var buffer = new (Java.type("char[]"))(1024 * 8);
+      var reader = new java.io.InputStreamReader(input, "utf-8");
+      var retval= new java.lang.StringBuilder();
+      while (true) {
+        var len = reader.read(buffer);
+        if (read < 0)
+          break;
+        retval.append(buffer, 0, read);
+      }
+      return retval.toString();
     } catch(e) {
       throw new ModuleError("Cannot read file ["+input+"]: ", "IO_ERROR", e);
     }
