@@ -256,16 +256,16 @@ module = (typeof module == 'undefined') ? {} :  module;
         var classloader = java.lang.Thread.currentThread().getContextClassLoader();
         input = classloader.getResourceAsStream(filename);
       } else {
-        input = new File(filename);
+        input = new java.io.FileInputStream(filename);
       }
-      var buffer = new (Java.type("char[]"))(1024 * 8);
+      var buffer = java.nio.CharBuffer.allocate(1024 * 8).array();
       var reader = new java.io.InputStreamReader(input, "utf-8");
       var retval= new java.lang.StringBuilder();
       while (true) {
         var len = reader.read(buffer);
-        if (read < 0)
+        if (len < 0)
           break;
-        retval.append(buffer, 0, read);
+        retval.append(buffer, 0, len);
       }
       return retval.toString();
     } catch(e) {
