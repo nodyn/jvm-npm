@@ -1,0 +1,22 @@
+{
+  "name": "jvm-npm",
+  "version": "0.1.0",
+  "description": "Support for NPM module loading in Javascript runtimes on the JVM",
+  "main": "src/main/javascript/jvm-npm.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "mvn integration-test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nodyn/jvm-npm.git"
+  },
+  "author": "Lance Ball <lball@redhat.com> (http://lanceball.com)",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/nodyn/jvm-npm/issues"
+  },
+  "homepage": "https://github.com/nodyn/jvm-npm#readme"
+}
