@@ -16,8 +16,6 @@
 // Since we intend to use the Function constructor.
 /* jshint evil: true */
 
-var Paths = java.nio.file.Paths;
-
 module = (typeof module == 'undefined') ? {} :  module;
 
 (function() {
@@ -57,9 +55,6 @@ module = (typeof module == 'undefined') ? {} :  module;
   }
 
   Module._load = function _load(file, parent, core, main) {
-      
-    print( "_load", file, parent, core, main );
-    
     var module = new Module(file, parent, core);
     var __FILENAME__ = module.filename;
     var body   = readFile(module.filename, module.core),
@@ -79,9 +74,6 @@ module = (typeof module == 'undefined') ? {} :  module;
   };
 
   function Require(id, parent) {
-      
-    print( "require", id, parent );
-      
     var core, native, file = Require.resolve(id, parent);
 
     if (!file) {
@@ -119,8 +111,6 @@ module = (typeof module == 'undefined') ? {} :  module;
   }
 
   Require.resolve = function(id, parent) {
-    print( "resolve", id, parent );
-  
     var roots = findRoots(parent);
     for ( var i = 0 ; i < roots.length ; ++i ) {
       var root = roots[i];
@@ -136,7 +126,7 @@ module = (typeof module == 'undefined') ? {} :  module;
     return false;
   };
 
-  Require.root = '';
+  Require.root = System.getProperty('user.dir');
   Require.NODE_PATH = undefined;
 
   function findRoots(parent) {
@@ -145,8 +135,29 @@ module = (typeof module == 'undefined') ? {} :  module;
     return r.concat( Require.paths );
   }
 
-  Require.paths = [];
+  function parsePaths(paths) {
+    if ( ! paths ) {
+      return [];
+    }
+    if ( paths === '' ) {
+      return [];
+    }
+    var osName = java.lang.System.getProperty("os.name").toLowerCase();
+    var separator;
 
+    if ( osName.indexOf( 'win' ) >= 0 ) {
+      separator = ';';
+    } else {
+      separator = ':';
+    }
+
+    return paths.split( separator );
+  }
+
+    
+  Require.paths = [];
+  
+  
   function findRoot(parent) {
     if (!parent || !parent.id) { return Require.root; }
     var pathParts = parent.id.split(/[\/|\\,]+/g);
@@ -168,30 +179,19 @@ module = (typeof module == 'undefined') ? {} :  module;
     return json;
   }
 
-  function getParent(root) {
-      return Paths.get( root ).getParent().toString();
-      
-  }
-  
   function resolveAsNodeModule(id, root) {
-    var base = Paths.get(root, 'node_modules').toString(); //[root, 'node_modules'].join('/');
-    
+    var base = [root, 'node_modules'].join('/');
     return resolveAsFile(id, base) ||
       resolveAsDirectory(id, base) ||
-      (root ? resolveAsNodeModule(id, getParent(root)) : false);
+      (root ? resolveAsNodeModule(id, new File(root).getParent()) : false);
   }
 
   function resolveAsDirectory(id, root) {
-    print( "resolveAsDirectory", id, root);
-    var base = Paths.get(root, id), //[root, id].join('/'),
-        file = Paths.get(base, 'package.json'), //[base, 'package.json'].join('/'),
-        cl = java.lang.Thread.currentThread().getContextClassLoader();  
-
-    var url = cl.getResource( file ); print( file , url );
-    
-    if (url!=null) {
+    var base = [root, id].join('/'),
+        file = new File([base, 'package.json'].join('/'));
+    if (file.exists()) {
       try {
-        var body = readFile( file, true ),
+        var body = readFile(file.getCanonicalPath()),
             package  = JSON.parse(body);
         if (package.main) {
           return (resolveAsFile(package.main, base) ||
@@ -207,33 +207,21 @@ module = (typeof module == 'undefined') ? {} :  module;
   }
 
   function resolveAsFile(id, root, ext) {
-    print( "resolveAsFile", id, root, ext);
-  
-    var file, cl = java.lang.Thread.currentThread().getContextClassLoader();  
-;
+    var file;
     if ( id.length > 0 && id[0] === '/' ) {
-      file = normalizeName(id, ext || '.js');
-      
-      var url = cl.getResource( file ); print( file , url );
-    
-      if (url!=null) {
+      file = new File(normalizeName(id, ext || '.js'));
+      if (!file.exists()) {
         return resolveAsDirectory(id);
       }
     } else {
-      //file = [root, normalizeName(id, ext || '.js')].join('/');
-      file = Paths.get(root, normalizeName(id, ext || '.js')).toString();
-
+      file = new File([root, normalizeName(id, ext || '.js')].join('/'));
     }
-    var url = cl.getResource( file ); print( file , url );
-
-    if (url!=null) {
-      return { path:file, core:true };
+    if (file.exists()) {
+      return file.getCanonicalPath();
     }
   }
 
   function resolveCoreModule(id, root) {
-    print( "resolveCoreModule", id, root);
-    
     var name = normalizeName(id);
     var classloader = java.lang.Thread.currentThread().getContextClassLoader();
     if (classloader.getResource(name))
