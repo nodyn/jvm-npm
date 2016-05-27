@@ -35,7 +35,8 @@ require.root = cwd;
 require.paths = [
     Paths.get(home,".node_modules").toString(),
     Paths.get(home,".node_libraries").toString(),
-    Paths.get(cwd,"lib").toString()
+    Paths.get(cwd,"lib").toString(),
+    Paths.get(cwd,"lib", "cyclic").toString()
 ];
 
 

@@ -47,7 +47,7 @@ public class RhinoTest {
                 //final RhinoTopLevelWithNativeRequire topLevel = new RhinoTopLevelWithNativeRequire(cx);
                 final RhinoTopLevel topLevel = new RhinoTopLevel(cx);
                 
-                loadModule(cx, topLevel, "src/test/javascript/specs/requireSpecRhino.js");
+                loadModule(cx, topLevel, "src/test/javascript/specs/rhino-requireSpec.js");
                 
                 return topLevel;
            }
