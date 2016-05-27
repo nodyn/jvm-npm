@@ -32,37 +32,82 @@ function it( msg, cb ) {
 
 function expect( condition ) {
   
-    var f = ( typeof condition == 'function' ) ? 
-                        condition : 
-                        function() { return condition; }
-    return { 
+    function _compareArray( a, b ) {
+        if( a.length!=b.length ) return false;
         
-        toBe:function(c) {
-            var ee = f();
-            if( c == ee ) return;
+        var i = 0;
+        a.forEach( function(e) {          
+            if( e != b[i++] ) return false;
+        });
+        return true;
+    }
+
+    
+    function _toBeTruthy() {
             
-            var msg =  "expect ["+ c + "] but is ["+ee+"]" ;              
-            throw new Error(msg);
-        },
-        toBeTruthy:function(c) {
-            var ee = f();
-            if( ee ) return;
+            print( "\n_toBeTruthy", condition );
+            if( condition ) return;
             
             var msg =  "expect true but is false" ;            
             throw new Error(msg);
             
-        },
-        toBeFalsy:function(c) {
-            var ee = f();
-            if( !ee ) return;
+    }
+    function _toBeFalsy() {
+            
+            if( !condition ) return;
             
             var msg =  "expect false but is true" ;            
             throw new Error(msg);
             
+    }
+    function _toBeNull() {
+            
+            if( condition==null ) return;
+            
+            var msg =  "expect null but is " + condition ;            
+            throw new Error(msg);
+            
+    }
+    function _toBeNotNull() {
+            print( "\n_toBeNotNull", condition );
+            if( condition!=null ) return;
+            
+            var msg =  "expect not null but is null" ;            
+            throw new Error(msg);
+            
+    }
+
+    return { 
+        
+        not: {
+            toBeTruthy:function() {
+                return _toBeFalsy();
+            },
+            toBeFalsy:function() {
+                return _toBeTruthy();
+            },  
+            toBeNull:function() {
+                return _toBeNotNull();
+            }
         },
+        toBeNull:function() {
+            return _toBeNull();
+        },
+        toBe:function(c) {
+            if( c == condition ) return;
+            
+            var msg =  "expect ["+ c + "] but is ["+condition+"]" ;              
+            throw new Error(msg);
+        },
+        toBeTruthy:function() {
+            return _toBeTruthy();
+        },
+        toBeFalsy:function() {
+            return _toBeFalsy();
+        },           
         toThrow:function(c) {
             try {
-                f();                
+                condition();                
             }
             catch(ex) {
                 if( ex.message != c.message ) {
@@ -76,18 +121,28 @@ function expect( condition ) {
             throw new Error(msg)
         },
         toBeDefined:function() {
-            var ee = f();
-            if( ee != undefined ) return;
+            if( condition != undefined ) return;
             
             var msg =  "expect defined but is undefined" ;            
             throw new Error(msg);
             
         },
         toEqual:function(c) {
-            //var ee = f();
             
-            //var msg =  "... error. expect false but is true" ;            
-            //throw new Error(msg);            
+            if( typeof c != typeof condition ) {
+                throw new Error("exspected type ["+(typeof c)+"] is different  from given ["+(typeof condition)+"]" );            
+            }   
+            
+            if( typeof c == 'object') {
+                if( _compareArray( c, condition ) ) return;
+            }
+            
+            if( c == condition ) {
+                return;
+            }
+            
+            var msg =  "expect ["+c+"] exception but is ["+condition+"]" ;            
+            throw new Error(msg);            
         }
     }
 }
@@ -95,7 +150,9 @@ function expect( condition ) {
 
 function report() {
     
+    out.println()
     out.println("========================");
     out.printf( "report test/fail %d/%d\n", new java.lang.Integer(_nTest),  new java.lang.Integer(_nFail));
     out.println("========================");
+    out.println()
 }

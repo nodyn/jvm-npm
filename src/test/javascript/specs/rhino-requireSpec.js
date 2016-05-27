@@ -1,20 +1,3 @@
-/**
- *  Copyright 2014 Lance Ball
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-// Make the native require function look in our local directory
-// for modules loaded with NativeRequire.require()
 
 var Paths = java.nio.file.Paths;
 
@@ -36,7 +19,9 @@ require.paths = [
     Paths.get(home,".node_modules").toString(),
     Paths.get(home,".node_libraries").toString(),
     Paths.get(cwd,"lib").toString(),
-    Paths.get(cwd,"lib", "cyclic").toString()
+    Paths.get(cwd,"lib", "cyclic").toString(),
+    Paths.get(cwd,"lib", "cyclic2").toString(),
+    Paths.get(cwd,"lib", "isolation").toString()
 ];
 
 
@@ -157,4 +142,113 @@ describe("NPM global require()", function() {
   });
 });
 
+describe("NPM Module execution context", function() {
+
+  it("should have a __dirname property", function() {
+    var top = require('./lib/simple_module');
+    expect(top.dirname).toBe([cwd, 'lib'].join('/'));
+  });
+
+  it("should have a __filename property", function() {
+    var top = require('./lib/simple_module');
+    expect(top.filename).toBe([cwd, 'lib/simple_module.js'].join('/'));
+  });
+
+  it("should not expose private module functions globally", function() {
+    var top = require('./lib/simple_module');
+    expect(top.privateFunction).toBe(undefined);
+  });
+
+  it("should have a parent property", function() {
+    var outer = require('./lib/outer');
+    expect(outer.innerParent.id).toBe([cwd, 'lib/outer.js'].join('/'));
+  });
+
+  it("should have a filename property", function() {
+    var outer = require('./lib/outer');
+    expect(outer.filename).toBe([cwd, 'lib/outer.js'].join('/'));
+  });
+
+  it("should have a children property", function() {
+    var outer = require('./lib/outer');
+    expect(outer.children.length).toBe(1);
+    expect(outer.children[0].id).toBe([cwd, 'lib/sub/inner.js'].join('/'));
+  });
+
+  it("should support setting the 'free' exports variable", function() {
+    var modExports = require('./lib/mod_exports');
+    expect(modExports.data).toBe("Hello!");
+  });
+
+});
+
+describe("module isolation", function() {
+  it("should expose global variables and not expose 'var' declared variables", function() {
+    var top = require( './lib/isolation/module-a.js');
+    expect(doLeak).toBe("cheddar");
+    try {
+      var shouldFail = doNotLeak;
+      // should have thrown
+      expect(true).toBe(false);
+    } catch (err) {
+      expect( err instanceof ReferenceError ).toBe(true);
+    }
+  });
+
+  it("should not leak function declarations", function() {
+    var top = require('./lib/isolation/module-c.js');
+    try {
+      var shouldFail = doNotLeak;
+      // should have thrown
+      expect(true).toBe(false);
+    } catch (err) {
+      expect( err instanceof ReferenceError ).toBe(true);
+    }
+  });
+});
+
+describe("cyclic with replacement of module.exports", function() {
+  it( "should have the same sense of an object in all places", function() {
+    var Stream = require( "./lib/cyclic2/stream.js" );
+
+    expect( typeof Stream ).toBe( "function"  );
+    expect( typeof Stream.Readable ).toBe( "function" );
+    expect( typeof Stream.Readable.Stream ).toBe( "function" );
+
+  });
+});
+
+describe("Core modules", function() {
+  it("should be found on the classpath", function() {
+    var core = require('core');    
+    expect(core).not.toBeFalsy();
+  });
+
+  it( "should have the same sense of an object in all places", function() {
+    var Core = require( "core.js" );
+
+    expect( typeof Core ).toBe( "function"  );
+    expect( typeof Core.Child ).toBe( "function" );
+    expect( typeof Core.Child.Core ).toBe( "function" );
+
+  });
+});
+
+describe("The Module module", function() {
+  it('should exist', function() {
+    var Module = require('rhino-npm');
+    expect(Module).toBeTruthy();
+  });
+
+  it('should have a runMain function', function() {
+    var Module = require('jvm-npm');
+    expect(typeof Module.runMain).toBe('function');
+  });
+});
+
 report();
+
+require.paths.forEach( function(p) {
+   
+    print( "path", p);
+});
