@@ -81,10 +81,16 @@ module = (typeof module == 'undefined') ? {} :  module;
         if (Require.debug) {
           System.out.println(['Cannot resolve', id, 'defaulting to native'].join(' '));
         }
-        native = NativeRequire.require(id);
-        if (native) return native;
+        try {
+            native = NativeRequire.require(id);
+            if (native) return native;
+        }catch(e) {
+          throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");        
+        }
       }
-      System.err.println("Cannot find module " + id);
+      if (Require.debug) {
+        System.err.println("Cannot find module " + id);
+      }
       throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
     }
 
@@ -134,27 +140,7 @@ module = (typeof module == 'undefined') ? {} :  module;
     r.push( findRoot( parent ) );
     return r.concat( Require.paths );
   }
-
-  function parsePaths(paths) {
-    if ( ! paths ) {
-      return [];
-    }
-    if ( paths === '' ) {
-      return [];
-    }
-    var osName = java.lang.System.getProperty("os.name").toLowerCase();
-    var separator;
-
-    if ( osName.indexOf( 'win' ) >= 0 ) {
-      separator = ';';
-    } else {
-      separator = ':';
-    }
-
-    return paths.split( separator );
-  }
-
-    
+   
   Require.paths = [];
   
   

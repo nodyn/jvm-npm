@@ -45,7 +45,6 @@ function expect( condition ) {
     
     function _toBeTruthy() {
             
-            print( "\n_toBeTruthy", condition );
             if( condition ) return;
             
             var msg =  "expect true but is false" ;            

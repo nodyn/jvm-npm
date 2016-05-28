@@ -6,7 +6,7 @@ import org.mozilla.javascript.ContextAction;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Scriptable;
 import static java.lang.String.format;
-import org.jasmine.RhinoTopLevel;
+import org.jasmine.RhinoTopLevelWithNativeRequire;
 
 public class RhinoTest {
 
@@ -44,8 +44,8 @@ public class RhinoTest {
            
             @Override
             public Object run(Context cx) {
-                //final RhinoTopLevelWithNativeRequire topLevel = new RhinoTopLevelWithNativeRequire(cx);
-                final RhinoTopLevel topLevel = new RhinoTopLevel(cx);
+                final RhinoTopLevelWithNativeRequire topLevel = new RhinoTopLevelWithNativeRequire(cx);
+                //final RhinoTopLevel topLevel = new RhinoTopLevel(cx);
                 
                 loadModule(cx, topLevel, "src/test/javascript/specs/rhino-requireSpec.js");
                 

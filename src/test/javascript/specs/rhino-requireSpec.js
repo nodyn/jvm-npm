@@ -28,41 +28,21 @@ require.paths = [
 load('src/main/javascript/jvm-jasmine.js');
 
 
-/*
 describe("NativeRequire", function() {
   require.cache = [];
- 
+
   it("should be a global object", function(){
     expect(typeof NativeRequire).toBe('object');
   });
-  
-  it("should expose builtin require() function", function(){
+
+  it("should expose DynJS' builtin require() function", function(){
     expect(typeof NativeRequire.require).toBe('function');
-    
     var f = NativeRequire.require('lib/native_test_module');
     expect(f).toBe("Foo!");
-    
-    require.root = Paths.get( cwd, "lib").toString();
-    
-    //expect(NativeRequire.require instanceof org.dynjs.runtime.builtins.Require).toBe(true);
+    //expect(NativeRequire.require instanceof org.mozilla.javascript.commonjs.module.Require).toBe(true);
   });
-*/
-
-/*
-  it("should fall back to builtin require() if not found", function() {
-    var called = false;
-    NativeRequire.require = function() {
-      called = true;
-      return "Got native module";
-    };
-    var native = require('not_found');
-    expect(native).toBe("Got native module");
-    expect(called).toBe(true);
-  });
-
 });
 
-*/
 
 describe("NPM global require()", function() {
   require.cache = [];
