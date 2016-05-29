@@ -21,7 +21,9 @@ module = (typeof module == 'undefined') ? {} :  module;
 (function() {
   var System  = java.lang.System,
       Scanner = java.util.Scanner,
-      File    = java.io.File;
+      File    = java.io.File,
+      Paths = java.nio.file.Paths
+      ;
 
   NativeRequire = (typeof NativeRequire === 'undefined') ? {} : NativeRequire;
   if (typeof require === 'function' && !NativeRequire.require) {
@@ -81,10 +83,16 @@ module = (typeof module == 'undefined') ? {} :  module;
         if (Require.debug) {
           System.out.println(['Cannot resolve', id, 'defaulting to native'].join(' '));
         }
-        native = NativeRequire.require(id);
-        if (native) return native;
+        try {
+            native = NativeRequire.require(id);
+            if (native) return native;
+        }catch(e) {
+          throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");        
+        }
       }
-      System.err.println("Cannot find module " + id);
+      if (Require.debug) {
+        System.err.println("Cannot find module " + id);
+      }
       throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
     }
 
@@ -128,49 +136,28 @@ module = (typeof module == 'undefined') ? {} :  module;
 
   Require.root = System.getProperty('user.dir');
   Require.NODE_PATH = undefined;
-
-  function findRoots(parent) {
-    var r = [];
-    r.push( findRoot( parent ) );
-    return r.concat( Require.paths );
-  }
-
-  function parsePaths(paths) {
-    if ( ! paths ) {
-      return [];
-    }
-    if ( paths === '' ) {
-      return [];
-    }
-    var osName = java.lang.System.getProperty("os.name").toLowerCase();
-    var separator;
-
-    if ( osName.indexOf( 'win' ) >= 0 ) {
-      separator = ';';
-    } else {
-      separator = ':';
-    }
-
-    return paths.split( separator );
-  }
-
-    
   Require.paths = [];
-  
-  
-  function findRoot(parent) {
-    if (!parent || !parent.id) { return Require.root; }
-    var pathParts = parent.id.split(/[\/|\\,]+/g);
-    pathParts.pop();
-    return pathParts.join('/');
-  }
-
   Require.debug = true;
   Require.cache = {};
   Require.extensions = {};
   require = Require;
 
   module.exports = Module;
+
+  function findRoots(parent) {
+    var r = [];
+    r.push( findRoot( parent ) );
+    return r.concat( Require.paths );
+  }
+     
+  function findRoot(parent) {
+    if (!parent || !parent.id) { 
+        return Require.root; 
+    }
+    var path = Paths.get( parent.id ).getParent();
+    
+    return  (path) ? path.toString() : "";
+  }
 
 
   function loadJSON(file) {

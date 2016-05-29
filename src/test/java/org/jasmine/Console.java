@@ -21,7 +21,10 @@ package org.jasmine;
  */
 public class Console {
     
+     public static boolean DEBUG = false;
+     
      public static void log( String msg, Object... args ) {
+        if( !DEBUG) return;
         
         System.out.printf( msg, (Object[])args);
         System.out.println();

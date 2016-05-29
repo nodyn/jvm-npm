@@ -43,29 +43,33 @@ public class RhinoModuleSourceProvider extends ModuleSourceProviderBase {
         
         return moduleId.endsWith(".js") ? moduleId : moduleId.concat(".js");
     }
-    
-    @Override
-    public ModuleSource loadSource(URI uri, URI base, Object validator) throws IOException, URISyntaxException {
-        log( "loadSource( %s, %s, %s )", uri, base, validator );
-        return super.loadSource(uri, base, validator); //To change body of generated methods, choose Tools | Templates.
+
+    private URI normalizeURI( URI uri ) throws URISyntaxException {
+        
+        final String n = normalizeModuleIdName(uri.toString());
+        
+        return new URI(n);
     }
 
     @Override
     public ModuleSource loadSource(String moduleId, Scriptable paths, Object validator) throws IOException, URISyntaxException {
         log( "loadSource( %s, %d, %s )", moduleId, getLength(paths), validator );
-        return super.loadSource(moduleId, paths, validator); //To change body of generated methods, choose Tools | Templates.
+        return super.loadSource(normalizeModuleIdName(moduleId), paths, validator); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    protected ModuleSource loadFromFallbackLocations(String moduleId, Object validator) throws IOException, URISyntaxException {
-        
-        final String _moduleId = normalizeModuleIdName(moduleId);
-        
-        log( "loadFromFallbackLocations( %s, %s )", _moduleId, validator );
+    public ModuleSource loadSource(URI uri, URI base, Object validator) throws IOException, URISyntaxException {
+        log( "loadSource( %s, %s, %s )", uri, base, validator );
+        return super.loadSource(normalizeURI(uri), base, validator); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    @Override
+    protected ModuleSource loadFromFallbackLocations(String moduleId, Object validator) throws IOException, URISyntaxException {     
+        log( "loadFromFallbackLocations( %s, %s )", moduleId, validator );
 
         final Path basedir = Paths.get(System.getProperty("user.dir"));
 
-        final Path path = Paths.get(basedir.toString(), _moduleId);
+        final Path path = Paths.get(basedir.toString(), moduleId);
 
         log( "\t\t lookup for file [%s]", path.toString() );
         if( path.toFile().exists() ) {
@@ -77,34 +81,34 @@ public class RhinoModuleSourceProvider extends ModuleSourceProviderBase {
         
         final ClassLoader cl = Thread.currentThread().getContextClassLoader();
         
-        java.net.URL moduleURL = cl.getResource(_moduleId);
+        java.net.URL moduleURL = cl.getResource(moduleId);
         
-        log( "\t\t look up in classpath [%s]", _moduleId );
+        log( "\t\t look up in classpath [%s]", moduleId );
         if( moduleURL != null ) {
 
-            log( "\t\t found in classpath [%s]", _moduleId );
+            log( "\t\t found in classpath [%s]", moduleId );
 
             return loadSource(moduleURL.toURI(), null, validator);
             
         }
         
-        log( "\t\tmodule not found  [%s]", _moduleId );
+        log( "\t\tmodule not found  [%s]", moduleId );
 
         return null;
     }
 
     @Override
     protected ModuleSource loadFromUri(URI uri, URI base, Object validator) throws IOException, URISyntaxException {
-                log( "loadFromUri( %s, %s, %s )", uri, base, validator );
-                
-                final java.io.Reader reader = new java.io.InputStreamReader(uri.toURL().openStream());
-                final Object securityDomain = null;
-                return new ModuleSource( 
-                        reader,
-                        securityDomain, 
-                        uri, 
-                        base,
-                        validator );
+        log( "loadFromUri( %s, %s, %s )", uri, base, validator );
+
+        final java.io.Reader reader = new java.io.InputStreamReader(uri.toURL().openStream());
+        final Object securityDomain = null;
+        return new ModuleSource( 
+                reader,
+                securityDomain, 
+                uri, 
+                base,
+                validator );
                 
     }
 
