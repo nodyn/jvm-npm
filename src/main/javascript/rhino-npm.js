@@ -1,27 +1,17 @@
 /**
- *  Copyright 2014 Lance Ball
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * 
+ * JVM-NPM TAILORED FOR RHINO JS ENGINE 
+ * 
  */
-// Since we intend to use the Function constructor.
-/* jshint evil: true */
 
 module = (typeof module == 'undefined') ? {} :  module;
 
 (function() {
   var System  = java.lang.System,
       Scanner = java.util.Scanner,
-      File    = java.io.File;
+      File    = java.io.File,
+      Paths = java.nio.file.Paths
+      ;
 
   NativeRequire = (typeof NativeRequire === 'undefined') ? {} : NativeRequire;
   if (typeof require === 'function' && !NativeRequire.require) {
@@ -81,10 +71,16 @@ module = (typeof module == 'undefined') ? {} :  module;
         if (Require.debug) {
           System.out.println(['Cannot resolve', id, 'defaulting to native'].join(' '));
         }
-        native = NativeRequire.require(id);
-        if (native) return native;
+        try {
+            native = NativeRequire.require(id);
+            if (native) return native;
+        }catch(e) {
+          throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");        
+        }
       }
-      System.err.println("Cannot find module " + id);
+      if (Require.debug) {
+        System.err.println("Cannot find module " + id);
+      }
       throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
     }
 
@@ -128,62 +124,28 @@ module = (typeof module == 'undefined') ? {} :  module;
 
   Require.root = System.getProperty('user.dir');
   Require.NODE_PATH = undefined;
-
-  function findRoots(parent) {
-    var r = [];
-    r.push( findRoot( parent ) );
-    return r.concat( Require.paths() );
-  }
-
-  function parsePaths(paths) {
-    if ( ! paths ) {
-      return [];
-    }
-    if ( paths === '' ) {
-      return [];
-    }
-    var osName = java.lang.System.getProperty("os.name").toLowerCase();
-    var separator;
-
-    if ( osName.indexOf( 'win' ) >= 0 ) {
-      separator = ';';
-    } else {
-      separator = ':';
-    }
-
-    return paths.split( separator );
-  }
-
-  Require.paths = function() {
-    var r = [];
-    r.push( java.lang.System.getProperty( "user.home" ) + "/.node_modules" );
-    r.push( java.lang.System.getProperty( "user.home" ) + "/.node_libraries" );
-
-    if ( Require.NODE_PATH ) {
-      r = r.concat( parsePaths( Require.NODE_PATH ) );
-    } else {
-      var NODE_PATH = java.lang.System.getenv.NODE_PATH;
-      if ( NODE_PATH ) {
-        r = r.concat( parsePaths( NODE_PATH ) );
-      }
-    }
-    // r.push( $PREFIX + "/node/library" );
-    return r;
-  };
-
-  function findRoot(parent) {
-    if (!parent || !parent.id) { return Require.root; }
-    var pathParts = parent.id.split(/[\/|\\,]+/g);
-    pathParts.pop();
-    return pathParts.join('/');
-  }
-
+  Require.paths = [];
   Require.debug = true;
   Require.cache = {};
   Require.extensions = {};
   require = Require;
 
   module.exports = Module;
+
+  function findRoots(parent) {
+    var r = [];
+    r.push( findRoot( parent ) );
+    return r.concat( Require.paths );
+  }
+     
+  function findRoot(parent) {
+    if (!parent || !parent.id) { 
+        return Require.root; 
+    }
+    var path = Paths.get( parent.id ).getParent();
+    
+    return  (path) ? path.toString() : "";
+  }
 
 
   function loadJSON(file) {

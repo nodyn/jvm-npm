@@ -6,6 +6,6 @@ function Stream() {
 
 }
 
-var Readable = require( 'stream_readable.js' );
+var Readable = require( './stream_readable.js' );
 
 Stream.Readable = Readable;
