@@ -1,10 +1,26 @@
+/**
+ * 
+ * JASMINE JS LITE FOR JVM JAVASCRIPT 
+ * 
+ */
 
 var writer = new java.io.StringWriter();
 var out = new java.io.PrintWriter(writer);
-var System = java.lang.System;
+var System = java.lang.System,
+    Integer = java.lang.Integer
+        ;
 
-var _nTest = 0;
-var _nFail = 0;
+var rpt = {
+    nTest:0,
+    nFail:0,   
+    print:function() {
+        out.println();
+        out.println("========================");
+        out.printf( "report test/fail %d/%d\n", new Integer(rpt.nTest),  new Integer(rpt.nFail));
+        out.println("========================");
+        out.println();       
+    }
+};
 
 function describe( msg, cb ) {
    
@@ -14,7 +30,7 @@ function describe( msg, cb ) {
 }
 
 function it( msg, cb ) {
-    ++_nTest;
+    ++rpt.nTest;
     
     this.fail = function( m ) {
         throw new Error(m);
@@ -27,7 +43,7 @@ function it( msg, cb ) {
         out.println(" ....passed");
     }
     catch( e ) {
-        ++_nFail;
+        ++rpt.nFail;
         out.printf(" ....error\n\n>>>\n%s\n<<<\n", e);
     }
 }
@@ -151,12 +167,12 @@ function expect( condition ) {
 
 function report() {
     
-    out.println()
-    out.println("========================");
-    out.printf( "report test/fail %d/%d\n", new java.lang.Integer(_nTest),  new java.lang.Integer(_nFail));
-    out.println("========================");
-    out.println()
+    rpt.print();
     
     out.flush();
     System.out.println( writer.toString() );
+    
+    if( rpt.nFail > 0 ) {
+        throw new Error( "TEST FAILED!");
+    }
 }
