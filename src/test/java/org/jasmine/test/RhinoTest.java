@@ -1,27 +1,27 @@
+package org.jasmine.test;
 
-import java.io.IOException;
+
 import org.junit.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
 import org.mozilla.javascript.ContextFactory;
-import org.mozilla.javascript.Scriptable;
-import static java.lang.String.format;
-import org.jasmine.RhinoTopLevelWithNativeRequire;
+import org.javascript.rhino.RhinoTopLevel;
+import static org.javascript.rhino.RhinoTopLevel.loadModule;
+import org.jasmine.test.MultiThreadedRunner;
 import org.junit.Ignore;
+import org.junit.runner.RunWith;
+import org.mozilla.javascript.Scriptable;
 
+@RunWith(MultiThreadedRunner.class)
 public class RhinoTest {
 
-    private void loadModule(Context cx, Scriptable scope, String moduleName) {
-
-        try (java.io.FileReader module = new java.io.FileReader( moduleName ) ) {
-
-            cx.evaluateReader(scope, module, moduleName, 0, null);
-        } catch (IOException e) {
-            throw new RuntimeException(format("error evaluating [%s]!", moduleName), e);
-        }
-    }
-        
     @Ignore
+    @Test
+    public void dummy() {
+
+    }    
+
+    
     @Test
     public void rhino_npm_js_test(){
         final ContextFactory contextFactory = new ContextFactory();
@@ -45,15 +45,20 @@ public class RhinoTest {
            
             @Override
             public Object run(Context cx) {
-                final RhinoTopLevelWithNativeRequire topLevel = new RhinoTopLevelWithNativeRequire(cx);
-                //final RhinoTopLevel topLevel = new RhinoTopLevel(cx);
+                //final RhinoTopLevelWithNativeRequire topLevel = new RhinoTopLevelWithNativeRequire(cx);
+                final RhinoTopLevel topLevel = new RhinoTopLevel(cx);
                 
-                loadModule(cx, topLevel, "src/test/javascript/specs/rhino-npm-requireSpec.js");
+                Scriptable newScope = cx.newObject(topLevel);
+                newScope.setPrototype(topLevel);
+                newScope.setParentScope(null);
                 
-                return topLevel;
+                RhinoTopLevel.installNativeRequire(cx, newScope, topLevel);
+                RhinoTopLevel.loadModule(cx, newScope, "src/test/javascript/specs/rhino-npm-requireSpec.js");
+                
+                return newScope;
            }
         });
-        
+     
     }
 
     @Test
@@ -79,14 +84,19 @@ public class RhinoTest {
            
             @Override
             public Object run(Context cx) {
-                final RhinoTopLevelWithNativeRequire topLevel = new RhinoTopLevelWithNativeRequire(cx);
-                //final RhinoTopLevel topLevel = new RhinoTopLevel(cx);
+                final RhinoTopLevel topLevel = new RhinoTopLevel(cx);
                 
-                loadModule(cx, topLevel, "src/test/javascript/specs/rhino-native-requireSpec.js");
+                Scriptable newScope = cx.newObject(topLevel);
+                newScope.setPrototype(topLevel);
+                newScope.setParentScope(null);
+                
+                RhinoTopLevel.installNativeRequire(cx, newScope, topLevel);
+                loadModule(cx, newScope, "src/test/javascript/specs/rhino-native-requireSpec.js");
                 
                 return topLevel;
            }
         });
+        
         
     }
     

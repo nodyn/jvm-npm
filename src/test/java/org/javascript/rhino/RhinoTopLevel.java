@@ -1,4 +1,19 @@
-package org.jasmine;
+/*
+ * Copyright 2016 softphone.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.javascript.rhino;
 
 import java.io.IOException;
 import org.mozilla.javascript.Context;
@@ -6,6 +21,11 @@ import org.mozilla.javascript.ImporterTopLevel;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import static org.mozilla.javascript.ScriptableObject.DONTENUM;
+import static java.lang.String.format;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import static org.javascript.rhino.Console.err;
+import static org.javascript.rhino.Console.log;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.commonjs.module.ModuleScriptProvider;
@@ -13,12 +33,12 @@ import org.mozilla.javascript.commonjs.module.Require;
 import org.mozilla.javascript.commonjs.module.RequireBuilder;
 import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProvider;
 import org.mozilla.javascript.commonjs.module.provider.StrongCachingModuleScriptProvider;
-import static org.jasmine.Console.*;
+
 /**
  *
  * @author softphone
  */
-public class RhinoTopLevelWithNativeRequire extends ImporterTopLevel {
+public class RhinoTopLevel extends ImporterTopLevel {
 
     
     /**
@@ -58,16 +78,37 @@ public class RhinoTopLevelWithNativeRequire extends ImporterTopLevel {
             return;
         }
 
+        RhinoTopLevel _this = null;
+        
+        if( thisObj instanceof RhinoTopLevel ) {
+            _this = (RhinoTopLevel) thisObj;
+        }
+        else {
+
+            final Scriptable protoObj = thisObj.getPrototype();
+            if( protoObj instanceof RhinoTopLevel ) {
+                _this = (RhinoTopLevel) protoObj;
+            }
+            else {
+                throw new IllegalStateException( "cannot deref thisObj to  RhinoTopLevel!");
+            }
+        }
+
         for (Object a : args) {
 
             final String module = Context.toString(a);
-
             
-            ((RhinoTopLevelWithNativeRequire) thisObj)._load(cx, module);
+            _this._load(cx, module);
         }
     }
 
+    private java.util.Set<String> moduleCache = new java.util.HashSet<>();
+    
     private void _load(Context cx, String module) {
+        
+        if( moduleCache.contains(module)) {
+            return;
+        }
         
         log( "loading module [%s]", module);
         
@@ -77,9 +118,10 @@ public class RhinoTopLevelWithNativeRequire extends ImporterTopLevel {
 
         if (is != null) {
 
-            try (final java.io.InputStreamReader r = new java.io.InputStreamReader(is) ) {
+            try {
+                cx.evaluateReader(this, new java.io.InputStreamReader(is), module, 0, null);
                 
-                cx.evaluateReader(this, r , module, 0, null);
+                moduleCache.add( module );
                 
             } catch (IOException e) {
                 err("error evaluating module [%s]", module, e);
@@ -101,9 +143,12 @@ public class RhinoTopLevelWithNativeRequire extends ImporterTopLevel {
 
             }
 
-            try (final java.io.FileReader reader = new java.io.FileReader(file) ) {
+            try {
+                final java.io.FileReader reader = new java.io.FileReader(file);
 
                 cx.evaluateReader(this, reader, module, 0, null);
+
+                moduleCache.add( module );
 
             } catch (IOException e) {
                 err("error evaluating module [%s]", module, e);
@@ -118,7 +163,7 @@ public class RhinoTopLevelWithNativeRequire extends ImporterTopLevel {
      * @param cx
      * @param sealed
      */
-    public RhinoTopLevelWithNativeRequire(Context cx) {
+    public RhinoTopLevel(Context cx) {
         this(cx, false);
     }
 
@@ -127,14 +172,22 @@ public class RhinoTopLevelWithNativeRequire extends ImporterTopLevel {
      * @param cx
      * @param sealed
      */
-    public RhinoTopLevelWithNativeRequire(Context cx, boolean sealed) {
+    public RhinoTopLevel(Context cx, boolean sealed) {
         super(cx, sealed);
         
-        installNativeRequire(cx, this, this);
+    }
 
+    public static void loadModule(Context cx, Scriptable scope, String moduleName) {
+
+        try (java.io.FileReader module = new java.io.FileReader( moduleName ) ) {
+
+            cx.evaluateReader(scope, module, moduleName, 0, null);
+        } catch (IOException e) {
+            throw new RuntimeException(format("error evaluating [%s]!", moduleName), e);
+        }
     }
     
-    private void installNativeRequire(Context cx, Scriptable globalScope, Scriptable scope) {
+    public static void installNativeRequire(Context cx, Scriptable globalScope, Scriptable scope) {
         final ModuleSourceProvider sourceProvider = new RhinoModuleSourceProvider();
         
         final ModuleScriptProvider scriptProvider = new StrongCachingModuleScriptProvider(sourceProvider);
@@ -153,17 +206,17 @@ public class RhinoTopLevelWithNativeRequire extends ImporterTopLevel {
         require.install(scope);
         
     }
+    
     @Override
     public void initStandardObjects(Context cx, boolean sealed) {
         super.initStandardObjects(cx, sealed);
         final String[] names = { "print", "load"};
 
+        defineFunctionProperties(names, getClass(), ScriptableObject.DONTENUM);
+
         final ScriptableObject objProto = (ScriptableObject) getObjectPrototype(this);
         objProto.defineFunctionProperties(names, getClass(), DONTENUM);
-        
-        defineFunctionProperties(names, getClass(), ScriptableObject.DONTENUM);
-        
-        
+
     }
 
 }

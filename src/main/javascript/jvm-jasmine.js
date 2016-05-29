@@ -1,5 +1,7 @@
 
-var out = java.lang.System.out;
+var writer = new java.io.StringWriter();
+var out = new java.io.PrintWriter(writer);
+var System = java.lang.System;
 
 var _nTest = 0;
 var _nFail = 0;
@@ -154,4 +156,7 @@ function report() {
     out.printf( "report test/fail %d/%d\n", new java.lang.Integer(_nTest),  new java.lang.Integer(_nFail));
     out.println("========================");
     out.println()
+    
+    out.flush();
+    System.out.println( writer.toString() );
 }

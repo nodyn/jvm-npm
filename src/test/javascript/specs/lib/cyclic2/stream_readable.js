@@ -1,7 +1,7 @@
 
 module.exports = Readable;
 
-var Stream = require('stream.js');
+var Stream = require('./stream.js');
 
 Readable.Stream = Stream
 
