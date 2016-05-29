@@ -21,7 +21,9 @@ module = (typeof module == 'undefined') ? {} :  module;
 (function() {
   var System  = java.lang.System,
       Scanner = java.util.Scanner,
-      File    = java.io.File;
+      File    = java.io.File,
+      Paths = java.nio.file.Paths
+      ;
 
   NativeRequire = (typeof NativeRequire === 'undefined') ? {} : NativeRequire;
   if (typeof require === 'function' && !NativeRequire.require) {
@@ -134,29 +136,28 @@ module = (typeof module == 'undefined') ? {} :  module;
 
   Require.root = System.getProperty('user.dir');
   Require.NODE_PATH = undefined;
-
-  function findRoots(parent) {
-    var r = [];
-    r.push( findRoot( parent ) );
-    return r.concat( Require.paths );
-  }
-   
   Require.paths = [];
-  
-  
-  function findRoot(parent) {
-    if (!parent || !parent.id) { return Require.root; }
-    var pathParts = parent.id.split(/[\/|\\,]+/g);
-    pathParts.pop();
-    return pathParts.join('/');
-  }
-
   Require.debug = true;
   Require.cache = {};
   Require.extensions = {};
   require = Require;
 
   module.exports = Module;
+
+  function findRoots(parent) {
+    var r = [];
+    r.push( findRoot( parent ) );
+    return r.concat( Require.paths );
+  }
+     
+  function findRoot(parent) {
+    if (!parent || !parent.id) { 
+        return Require.root; 
+    }
+    var path = Paths.get( parent.id ).getParent();
+    
+    return  (path) ? path.toString() : "";
+  }
 
 
   function loadJSON(file) {

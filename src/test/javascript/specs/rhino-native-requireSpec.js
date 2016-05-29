@@ -1,47 +1,27 @@
 
-var Paths = java.nio.file.Paths;
+var Paths = java.nio.file.Paths,
+    System = java.lang.System    
+        ;
 
 var cwd = Paths.get(
-            java.lang.System.getProperty('user.dir'),
+            System.getProperty('user.dir'),
            'src/test/javascript/specs')
            .toString()
             ;
 
-var home = java.lang.System.getProperty('user.home');
+var home = System.getProperty('user.home');
 
-java.lang.System.setProperty('user.dir', cwd); // set current dir
+System.setProperty('user.dir', cwd); // set current dir
 
-// Load the NPM module loader into the global scope
-load('src/main/javascript/rhino-npm.js');
 
 require.root = cwd;  
 require.paths = [
     Paths.get(home,".node_modules").toString(),
-    Paths.get(home,".node_libraries").toString(),
-    Paths.get(cwd,"lib").toString(),
-    Paths.get(cwd,"lib", "cyclic").toString(),
-    Paths.get(cwd,"lib", "cyclic2").toString(),
-    Paths.get(cwd,"lib", "isolation").toString()
+    Paths.get(home,".node_libraries").toString()
 ];
 
 
 load('src/main/javascript/jvm-jasmine.js');
-
-
-describe("NativeRequire", function() {
-  require.cache = [];
-
-  it("should be a global object", function(){
-    expect(typeof NativeRequire).toBe('object');
-  });
-
-  it("should expose DynJS' builtin require() function", function(){
-    expect(typeof NativeRequire.require).toBe('function');
-    var f = NativeRequire.require('lib/native_test_module');
-    expect(f).toBe("Foo!");
-    //expect(NativeRequire.require instanceof org.mozilla.javascript.commonjs.module.Require).toBe(true);
-  });
-});
 
 
 describe("NPM global require()", function() {
@@ -51,6 +31,7 @@ describe("NPM global require()", function() {
     expect(typeof require).toBe('function');
   });
 
+  /*  
   it("should have a resolve() property that is a function", function() {
     expect(typeof require.resolve).toBe('function');
   });
@@ -62,9 +43,9 @@ describe("NPM global require()", function() {
   it("should have an extensions property that is an Object", function() {
     expect(typeof require.extensions).toBe('object');
   });
-
+  */
   it("should throw an Error if a file can't be found", function() {
-    expect( function() {require('not_found.js');} ).toThrow(new Error('Cannot find module not_found.js'));
+    expect( function() {require('not_found.js');} ).toThrow(new Error('Module "not_found.js" not found.'));
     try {
       require('./not_found.js');
     } catch(e) {
@@ -88,7 +69,7 @@ describe("NPM global require()", function() {
   });
 
   it("outer.quadruple is defined ", function() {
-    var outer = require('./lib/outer');
+    var outer = require('lib/outer');
     expect(outer.quadruple).toBeDefined();    
   });
   
