@@ -25,9 +25,22 @@ require.paths = [
 
 load('src/main/javascript/jvm-jasmine.js');
 
-beforeEach( function() {
-  require.cache = [];    
+
+describe("NativeRequire", function() {
+  require.cache = [];
+
+  it("should be a global object", function(){
+    expect(typeof NativeRequire).toBe('object');
+  });
+
+  it("should expose Rhino' builtin require() function", function(){
+    expect(typeof NativeRequire.require).toBe('function');
+    var f = NativeRequire.require('lib/native_test_module');
+    expect(f).toBe("Foo!");
+    //expect(NativeRequire.require instanceof org.mozilla.javascript.commonjs.module.Require).toBe(true);
+  });
 });
+
 
 describe("NPM global require()", function() {
   require.cache = [];
