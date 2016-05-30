@@ -1,3 +1,8 @@
+/**
+ * 
+ * JASMINE TEST FOR RHINO WITH NATIVE REQUIRE
+ * 
+ */
 
 var Paths = java.nio.file.Paths,
     System = java.lang.System    

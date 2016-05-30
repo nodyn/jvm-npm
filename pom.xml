@@ -133,6 +133,27 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.5.0</version>
+        <executions>
+            <execution>
+                <id>Jasmine Integration Tests</id>
+                <phase>integration-test</phase>
+                <goals>
+                    <goal>java</goal>
+                </goals>
+                <configuration>
+                    <mainClass>org.jasmine.test.RhinoClassLoaderTest</mainClass>
+                    <classpathScope>test</classpathScope>
+                    <arguments>
+                    </arguments>
+                </configuration>
+            </execution>
+        </executions>
+ 
+      </plugin>
     </plugins>
   </build>
 </project>

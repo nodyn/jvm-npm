@@ -187,8 +187,7 @@ public class RhinoTopLevel extends ImporterTopLevel {
         }
     }
     
-    public static void installNativeRequire(Context cx, Scriptable globalScope, Scriptable scope) {
-        final ModuleSourceProvider sourceProvider = new RhinoModuleSourceProvider();
+    public static void installNativeRequire(Context cx, Scriptable globalScope, Scriptable scope,  final ModuleSourceProvider sourceProvider) {
         
         final ModuleScriptProvider scriptProvider = new StrongCachingModuleScriptProvider(sourceProvider);
         

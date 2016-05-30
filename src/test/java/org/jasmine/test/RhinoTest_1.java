@@ -1,8 +1,6 @@
 package org.jasmine.test;
 
 
-import org.javascript.rhino.RhinoModuleSourceClassLoaderProvider;
-import org.javascript.rhino.RhinoModuleSourceProvider;
 import org.junit.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
@@ -14,7 +12,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProvider;
 
 @RunWith(MultiThreadedRunner.class)
 public class RhinoTest {
@@ -55,21 +52,22 @@ public class RhinoTest {
     public void dummy() {
 
     }    
-   
-    @Test 
+
+    
+    @Test
     public void rhino_npm_js_test(){
-        final ModuleSourceProvider sourceProvider = new RhinoModuleSourceProvider();
         contextFactory.call( new ContextAction() {
            
             @Override
             public Object run(Context cx) {
+                //final RhinoTopLevelWithNativeRequire topLevel = new RhinoTopLevelWithNativeRequire(cx);
                 final RhinoTopLevel topLevel = new RhinoTopLevel(cx);
                 
                 Scriptable newScope = cx.newObject(topLevel);
                 newScope.setPrototype(topLevel);
-                //newScope.setParentScope(null);
+                newScope.setParentScope(null);
                 
-                RhinoTopLevel.installNativeRequire(cx, newScope, topLevel,sourceProvider);
+                RhinoTopLevel.installNativeRequire(cx, newScope, topLevel);
                 RhinoTopLevel.loadModule(cx, newScope, "src/test/javascript/specs/rhino-npm-native-requireSpec.js");
                 
                 return newScope;
@@ -80,8 +78,6 @@ public class RhinoTest {
 
     @Test
     public void rhino_npm_native_test(){
-        final ModuleSourceProvider sourceProvider = new RhinoModuleSourceProvider();
-
         contextFactory.call( new ContextAction() {
            
             @Override
@@ -90,12 +86,12 @@ public class RhinoTest {
                 
                 Scriptable newScope = cx.newObject(topLevel);
                 newScope.setPrototype(topLevel);
-                //newScope.setParentScope(null);
+                newScope.setParentScope(null);
                 
-                RhinoTopLevel.installNativeRequire(cx, newScope, topLevel, sourceProvider);
+                RhinoTopLevel.installNativeRequire(cx, newScope, topLevel);
                 loadModule(cx, newScope, "src/test/javascript/specs/rhino-native-requireSpec.js");
                 
-                return newScope;
+                return topLevel;
            }
         });
                 
@@ -108,18 +104,13 @@ public class RhinoTest {
             @Override
             public Object run(Context cx) {
                 final RhinoTopLevel topLevel = new RhinoTopLevel(cx);
-
-                Scriptable newScope = cx.newObject(topLevel);
-                newScope.setPrototype(topLevel);
-                //newScope.setParentScope(null);
                 
-                loadModule(cx, newScope, "src/test/javascript/specs/rhino-npm-requireSpec.js");
+                loadModule(cx, topLevel, "src/test/javascript/specs/rhino-npm-requireSpec.js");
                 
-                return newScope;
+                return topLevel;
            }
         });
         
         
     }
-    
 }
