@@ -18,7 +18,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.dynjs>0.2.2</version.dynjs>
+    <version.dynjs>0.3.1</version.dynjs>
     <version.jasmine-cli>0.0.12</version.jasmine-cli>
   </properties>
 
@@ -53,28 +53,14 @@
       <version>${version.dynjs}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>com.github.akiellor.jasmine</groupId>
-      <artifactId>jasmine-cli</artifactId>
-      <version>${version.jasmine-cli}</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.dynjs</groupId>
-          <artifactId>dynjs</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.projectodd.rephract</groupId>
-          <artifactId>rephract</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+
     <dependency>
       <groupId>org.mozilla</groupId>
       <artifactId>rhino</artifactId>
       <version>1.7.7.1</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -142,35 +128,6 @@
                   <version>3.0.0</version>
                 </requireMavenVersion>
               </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-        <executions>
-          <execution>
-            <id>Jasmine Integration Tests</id>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <configuration>
-              <mainClass>org.jasmine.cli.Main</mainClass>
-              <classpathScope>test</classpathScope>
-              <systemPropertyVariables>
-                <dynjs.compile.mode>OFF</dynjs.compile.mode>
-              </systemPropertyVariables>
-              <arguments>
-                <argument>--pattern</argument>
-                <argument>./src/test/javascript/**/*Spec.js</argument>
-                <argument>--format</argument>
-                <argument>DOC</argument>
-                <argument>--compile-mode</argument>
-                <argument>OFF</argument>
-              </arguments>
             </configuration>
           </execution>
         </executions>

@@ -10,42 +10,55 @@ var System = java.lang.System,
     Integer = java.lang.Integer
         ;
 
-var rpt = {
+var jasmine = {
     nTest:0,
-    nFail:0,   
-    print:function() {
+    nFail:0,  
+    beforeEach:null,
+    printReport:function() {
         out.println();
         out.println("========================");
-        out.printf( "report test/fail %d/%d\n", new Integer(rpt.nTest),  new Integer(rpt.nFail));
+        out.print( "report test/fail ");
+            out.print(new Integer(jasmine.nTest)); 
+            out.print("/"); 
+            out.println(new Integer(jasmine.nFail));
         out.println("========================");
         out.println();       
     }
 };
 
+function beforeEach( cb ) {
+    jasmine.beforeEach = cb;
+}
+
 function describe( msg, cb ) {
    
     out.println( msg );
+   
+    if( jasmine.beforeEach ) jasmine.beforeEach();
     
     cb();
 }
 
 function it( msg, cb ) {
-    ++rpt.nTest;
+    ++jasmine.nTest;
     
     this.fail = function( m ) {
         throw new Error(m);
-    } 
+    };
     
-    out.printf( "\t%s", msg );
+    out.print( "\t"); out.print(msg);
     
     try {
         cb(); 
         out.println(" ....passed");
     }
     catch( e ) {
-        ++rpt.nFail;
-        out.printf(" ....error\n\n>>>\n%s\n<<<\n", e);
+        ++jasmine.nFail;
+        out.println(" ....error\n\n>>>"); 
+            out.println(e.message); 
+            out.println("<<<");
     }
+
 }
 
 function expect( condition ) {
@@ -93,6 +106,18 @@ function expect( condition ) {
             throw new Error(msg);
             
     }
+    function _toBeDefined() {
+        if( condition != undefined ) return;
+
+        var msg =  "expect defined but is undefined" ;            
+        throw new Error(msg);            
+    }
+    function _toBeUndefined() {
+        if( condition == undefined ) return;
+
+        var msg =  "expect undefined but is " + condition ;            
+        throw new Error(msg);            
+    }
 
     return { 
         
@@ -105,6 +130,9 @@ function expect( condition ) {
             },  
             toBeNull:function() {
                 return _toBeNotNull();
+            },
+            toBeDefined:function() {
+                return _toBeUndefined();
             }
         },
         toBeNull:function() {
@@ -117,10 +145,10 @@ function expect( condition ) {
             throw new Error(msg);
         },
         toBeTruthy:function() {
-            return _toBeTruthy();
+            _toBeTruthy();
         },
         toBeFalsy:function() {
-            return _toBeFalsy();
+            _toBeFalsy();
         },           
         toThrow:function(c) {
             try {
@@ -138,11 +166,7 @@ function expect( condition ) {
             throw new Error(msg)
         },
         toBeDefined:function() {
-            if( condition != undefined ) return;
-            
-            var msg =  "expect defined but is undefined" ;            
-            throw new Error(msg);
-            
+            _toBeDefined();
         },
         toEqual:function(c) {
             
@@ -167,12 +191,12 @@ function expect( condition ) {
 
 function report() {
     
-    rpt.print();
+    jasmine.printReport();
     
     out.flush();
     System.out.println( writer.toString() );
     
-    if( rpt.nFail > 0 ) {
+    if( jasmine.nFail > 0 ) {
         throw new Error( "TEST FAILED!");
     }
 }

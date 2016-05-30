@@ -62,7 +62,7 @@ describe("NPM global require()", function() {
   });
 
   it("should throw an Error if a file can't be found", function() {
-    expect( function() {require('not_found.js');} ).toThrow(new Error('Cannot find module not_found.js'));
+    expect( function() {require('not_found.js');} ).toThrow(new Error('cannot load module not_found.js'));
     try {
       require('./not_found.js');
     } catch(e) {

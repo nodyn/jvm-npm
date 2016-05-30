@@ -69,19 +69,19 @@ module = (typeof module == 'undefined') ? {} :  module;
     if (!file) {
       if (typeof NativeRequire.require === 'function') {
         if (Require.debug) {
-          System.out.println(['Cannot resolve', id, 'defaulting to native'].join(' '));
+          System.out.println(['cannot resolve', id, 'defaulting to native'].join(' '));
         }
         try {
             native = NativeRequire.require(id);
             if (native) return native;
         }catch(e) {
-          throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");        
+          throw new ModuleError("cannot load module " + id, "MODULE_NOT_FOUND");        
         }
       }
       if (Require.debug) {
-        System.err.println("Cannot find module " + id);
+        System.err.println("cannot load module " + id);
       }
-      throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
+      throw new ModuleError("cannot load module " + id, "MODULE_NOT_FOUND");
     }
 
     if (file.core) {
