@@ -1,6 +1,6 @@
 module = (typeof module == 'undefined') ? {} : module;
 (function () {
-    var System = java.lang.System, Scanner = java.util.Scanner, File = java.io.File, Paths = java.nio.file.Paths;
+    var System = java.lang.System, Scanner = java.util.Scanner, File = java.io.File, Paths = java.nio.file.Paths, Thread = java.lang.Thread;
     NativeRequire = (typeof NativeRequire === 'undefined') ? {} : NativeRequire;
     if (typeof require === 'function' && !NativeRequire.require) {
         NativeRequire.require = require;
@@ -55,8 +55,7 @@ module = (typeof module == 'undefined') ? {} : module;
     function resolveCoreModule(id, root) {
         print("resolveCoreModule", id, root);
         var name = normalizeName(id);
-        var classloader = java.lang.Thread.currentThread().getContextClassLoader();
-        if (classloader.getResource(name))
+        if (isResourceResolved(name))
             return { path: name, core: true };
     }
     function resolveAsNodeModule(id, root) {
@@ -88,24 +87,25 @@ module = (typeof module == 'undefined') ? {} : module;
     }
     function resolveAsFile(id, root, ext) {
         print("resolveAsFile", id, root, ext);
-        var file, cl = java.lang.Thread.currentThread().getContextClassLoader();
-        ;
+        var file;
         if (id.length > 0 && id[0] === '/') {
             file = normalizeName(id, ext || '.js');
-            var url = cl.getResource(file);
-            print(file, url);
-            if (url != null) {
+            if (isResourceResolved(file)) {
                 return resolveAsDirectory(id);
             }
         }
         else {
-            file = Paths.get(root, normalizeName(id, ext || '.js')).toString();
+            file = Paths.get(root, normalizeName(id, ext || '.js')) || "";
         }
-        var url = cl.getResource(file);
-        print(file, url);
-        if (url != null) {
+        if (isResourceResolved(file)) {
             return { path: file, core: true };
         }
+    }
+    function isResourceResolved(id) {
+        var cl = Thread.currentThread().getContextClassLoader();
+        var url = cl.getResource(id);
+        print(id, url);
+        return url != null;
     }
     var Require = (function () {
         function Require(id, parent) {
@@ -191,8 +191,8 @@ module = (typeof module == 'undefined') ? {} : module;
     function getParent(root) {
         return Paths.get(root).getParent() || "";
     }
-    function normalizeName(fileName, ext) {
-        var extension = ext || '.js';
+    function normalizeName(fileName, extension) {
+        if (extension === void 0) { extension = '.js'; }
         if (String(fileName).endsWith(extension)) {
             return fileName;
         }

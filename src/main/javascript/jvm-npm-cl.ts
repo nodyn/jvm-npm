@@ -10,6 +10,7 @@ declare namespace java {
     var System:any;
     var Thread:any;
     var Exception:any;
+    var Thread:any;
   }
   namespace io {
     var File:any;
@@ -49,7 +50,8 @@ module = (typeof module == 'undefined') ? {} :  module;
   var System  = java.lang.System,
       Scanner = java.util.Scanner,
       File    = java.io.File,
-      Paths = java.nio.file.Paths
+      Paths = java.nio.file.Paths,
+      Thread = java.lang.Thread
       ;
 
   NativeRequire = (typeof NativeRequire === 'undefined') ? {} : NativeRequire;
@@ -135,8 +137,8 @@ module = (typeof module == 'undefined') ? {} :  module;
       print( "resolveCoreModule", id, root);
 
       var name = normalizeName(id);
-      var classloader = java.lang.Thread.currentThread().getContextClassLoader();
-      if (classloader.getResource(name))
+
+      if (isResourceResolved(name))
           return { path: name, core: true };
     }
 
@@ -176,34 +178,35 @@ module = (typeof module == 'undefined') ? {} :  module;
   function resolveAsFile(id:string, root, ext?:string):ResolveResult {
     print( "resolveAsFile", id, root, ext);
 
-    var file, cl = java.lang.Thread.currentThread().getContextClassLoader();
-;
+    var file;
+
     if ( id.length > 0 && id[0] === '/' ) {
       file = normalizeName(id, ext || '.js');
 
-      var url = cl.getResource( file ); print( file , url );
-
-      if (url!=null) {
+      if (isResourceResolved(file)) {
         return resolveAsDirectory(id);
       }
     } else {
-      //file = [root, normalizeName(id, ext || '.js')].join('/');
-      file = Paths.get(root, normalizeName(id, ext || '.js')).toString();
-
+      file = Paths.get(root, normalizeName(id, ext || '.js')) || "";
     }
-    var url = cl.getResource( file ); print( file , url );
 
-    if (url!=null) {
+    if (isResourceResolved(file)) {
       return { path:file, core:true };
     }
   }
 
+  function isResourceResolved( id:string ):boolean {
+    var cl = Thread.currentThread().getContextClassLoader();
 
+    var url = cl.getResource( id ); print( id , url );
+
+    return url!=null;
+  }
 
   class Require {
     static root = '';
     static NODE_PATH = undefined;
-    static paths = [];
+    static paths:Array<string> = [];
     static debug = true;
     static cache:[any];
     static extensions = {};
@@ -214,14 +217,16 @@ module = (typeof module == 'undefined') ? {} :  module;
         var roots = findRoots(parent);
         for ( var i = 0 ; i < roots.length ; ++i ) {
           var root = roots[i];
-          var result = resolveCoreModule(id, root) ||
-            resolveAsFile(id, root, '.js')   ||
-            resolveAsFile(id, root, '.json') ||
-            resolveAsDirectory(id, root)     ||
+          var result =
+            resolveCoreModule(id, root)       ||
+            resolveAsFile(id, root, '.js')    ||
+            resolveAsFile(id, root, '.json')  ||
+            resolveAsDirectory(id, root)      ||
             resolveAsNodeModule(id, root);
-          if ( result ) {
-            return result;
-          }
+
+            if ( result ) {
+              return result;
+            }
         }
       };
 
@@ -269,9 +274,11 @@ module = (typeof module == 'undefined') ? {} :  module;
 
 
 
-  function findRoots(parent) {
-    var r = [];
+  function findRoots(parent):Array<string> {
+    var r:Array<string> = [];
+
     r.push( findRoot( parent ) );
+
     return r.concat( Require.paths );
   }
 
@@ -296,8 +303,7 @@ module = (typeof module == 'undefined') ? {} :  module;
   }
 
 
-  function normalizeName(fileName:string, ext?:string) {
-    var extension = ext || '.js';
+  function normalizeName(fileName:string, extension = '.js') {
 
     if (String(fileName).endsWith(extension)) {
       return fileName;
@@ -320,17 +326,5 @@ module = (typeof module == 'undefined') ? {} :  module;
       throw new ModuleError("Cannot read file ["+input+"]: ", "IO_ERROR", e);
     }
   }
-
-/*
-  function endsWith( s:string, suffix:string ):number
-  // Helper function until ECMAScript 6 is complete
-  if (typeof String.prototype.endsWith !== 'function') {
-
-      String.prototype.endsWith = function(suffix) {
-        if (!suffix) return false;
-        return this.indexOf(suffix, this.length - suffix.length) !== -1;
-      };
-  }
-*/
 
 }());
