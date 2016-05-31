@@ -117,72 +117,79 @@ module = (typeof module == 'undefined') ? {} :  module;
     }
   }
 
-
-  function Require(id:string, parent:any) {
-
-    print( "require", id, parent );
-
-    var core, native, file = Require.resolve(id, parent);
-
-    if (!file) {
-      if (typeof NativeRequire.require === 'function') {
-        if (Require.debug) {
-          System.out.println(['Cannot resolve', id, 'defaulting to native'].join(' '));
-        }
-        native = NativeRequire.require(id);
-        if (native) return native;
-      }
-      System.err.println("Cannot find module " + id);
-      throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
-    }
-
-    if (file.core) {
-      file = file.path;
-      core = true;
-    }
-    try {
-      if (Require.cache[file]) {
-        return Require.cache[file];
-      } else if (file.endsWith('.js')) {
-        return Module._load(file, parent, core);
-      } else if (file.endsWith('.json')) {
-        return loadJSON(file);
-      }
-    } catch(ex) {
-      if (ex instanceof java.lang.Exception) {
-        throw new ModuleError("Cannot load module " + id, "LOAD_ERROR", ex);
-      } else {
-        System.out.println("Cannot load module " + id + " LOAD_ERROR");
-        throw ex;
-      }
-    }
+  interface ResolveResult {
+    path:string;
+    core?:boolean;
   }
 
-  Require.resolve = function(id, parent) {
-    print( "resolve", id, parent );
+  class Require {
+    static root = '';
+    static NODE_PATH = undefined;
+    static paths = [];
+    static debug = true;
+    static cache:[any];
+    static extensions = {};
 
-    var roots = findRoots(parent);
-    for ( var i = 0 ; i < roots.length ; ++i ) {
-      var root = roots[i];
-      var result = resolveCoreModule(id, root) ||
-        resolveAsFile(id, root, '.js')   ||
-        resolveAsFile(id, root, '.json') ||
-        resolveAsDirectory(id, root)     ||
-        resolveAsNodeModule(id, root);
-      if ( result ) {
-        return result;
+    static resolve(id, parent?):ResolveResult {
+        print( "resolve", id, parent );
+
+        var roots = findRoots(parent);
+        for ( var i = 0 ; i < roots.length ; ++i ) {
+          var root = roots[i];
+          var result = resolveCoreModule(id, root) ||
+            resolveAsFile(id, root, '.js')   ||
+            resolveAsFile(id, root, '.json') ||
+            resolveAsDirectory(id, root)     ||
+            resolveAsNodeModule(id, root);
+          if ( result ) {
+            return result;
+          }
+        }
+      };
+
+  constructor(id:string, parent:any){
+        print( "require", id, parent );
+
+        var core, native, file = Require.resolve(id, parent);
+
+        if (!file) {
+          if (typeof NativeRequire.require === 'function') {
+            if (Require.debug) {
+              System.out.println(['Cannot resolve', id, 'defaulting to native'].join(' '));
+            }
+            native = NativeRequire.require(id);
+            if (native) return native;
+          }
+          System.err.println("Cannot find module " + id);
+          throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
+        }
+
+
+        if (file.core) {
+          file = file.path;
+          core = true;
+        }
+        try {
+          if (Require.cache[file]) {
+            return Require.cache[file];
+          } else if (file.endsWith('.js')) {
+            return Module._load(file, parent, core);
+          } else if (file.endsWith('.json')) {
+            return loadJSON(file);
+          }
+        } catch(ex) {
+          if (ex instanceof java.lang.Exception) {
+            throw new ModuleError("Cannot load module " + id, "LOAD_ERROR", ex);
+          } else {
+            System.out.println("Cannot load module " + id + " LOAD_ERROR");
+            throw ex;
+          }
+        }
       }
-    }
-    return false;
-  };
+  }
 
-  Require.root = '';
-  Require.NODE_PATH = undefined;
-  Require.paths = [];
-  Require.debug = true;
-  Require.cache = {};
-  Require.extensions = {};
   require = Require;
+
   module.exports = Module;
 
 
