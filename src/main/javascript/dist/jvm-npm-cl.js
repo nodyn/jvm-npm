@@ -33,7 +33,7 @@ module = (typeof module == 'undefined') ? {} : module;
             if (parent && parent.children)
                 parent.children.push(this);
             this.require = function (id) {
-                return Require(id, this);
+                return new Require(id, this);
             }.bind(this);
         }
         Module._load = function (file, parent, core, main) {
@@ -48,100 +48,22 @@ module = (typeof module == 'undefined') ? {} : module;
         };
         Module.runMain = function (main) {
             var file = Require.resolve(main);
-            Module._load(file, undefined, false, true);
+            Module._load(file.path, undefined, file.core, true);
         };
         return Module;
     }());
-    function Require(id, parent) {
-        print("require", id, parent);
-        var core, native, file = Require.resolve(id, parent);
-        if (!file) {
-            if (typeof NativeRequire.require === 'function') {
-                if (Require.debug) {
-                    System.out.println(['Cannot resolve', id, 'defaulting to native'].join(' '));
-                }
-                native = NativeRequire.require(id);
-                if (native)
-                    return native;
-            }
-            System.err.println("Cannot find module " + id);
-            throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
-        }
-        if (file.core) {
-            file = file.path;
-            core = true;
-        }
-        try {
-            if (Require.cache[file]) {
-                return Require.cache[file];
-            }
-            else if (file.endsWith('.js')) {
-                return Module._load(file, parent, core);
-            }
-            else if (file.endsWith('.json')) {
-                return loadJSON(file);
-            }
-        }
-        catch (ex) {
-            if (ex instanceof java.lang.Exception) {
-                throw new ModuleError("Cannot load module " + id, "LOAD_ERROR", ex);
-            }
-            else {
-                System.out.println("Cannot load module " + id + " LOAD_ERROR");
-                throw ex;
-            }
-        }
-    }
-    Require.resolve = function (id, parent) {
-        print("resolve", id, parent);
-        var roots = findRoots(parent);
-        for (var i = 0; i < roots.length; ++i) {
-            var root = roots[i];
-            var result = resolveCoreModule(id, root) ||
-                resolveAsFile(id, root, '.js') ||
-                resolveAsFile(id, root, '.json') ||
-                resolveAsDirectory(id, root) ||
-                resolveAsNodeModule(id, root);
-            if (result) {
-                return result;
-            }
-        }
-        return false;
-    };
-    Require.root = '';
-    Require.NODE_PATH = undefined;
-    Require.paths = [];
-    Require.debug = true;
-    Require.cache = {};
-    Require.extensions = {};
-    require = Require;
-    module.exports = Module;
-    function findRoots(parent) {
-        var r = [];
-        r.push(findRoot(parent));
-        return r.concat(Require.paths);
-    }
-    function findRoot(parent) {
-        if (!parent || !parent.id) {
-            return Require.root;
-        }
-        var pathParts = parent.id.split(/[\/|\\,]+/g);
-        pathParts.pop();
-        return pathParts.join('/');
-    }
-    function loadJSON(file) {
-        var json = JSON.parse(readFile(file, true));
-        Require.cache[file] = json;
-        return json;
-    }
-    function getParent(root) {
-        return Paths.get(root).getParent() || "";
+    function resolveCoreModule(id, root) {
+        print("resolveCoreModule", id, root);
+        var name = normalizeName(id);
+        var classloader = java.lang.Thread.currentThread().getContextClassLoader();
+        if (classloader.getResource(name))
+            return { path: name, core: true };
     }
     function resolveAsNodeModule(id, root) {
         var base = Paths.get(root, 'node_modules') || "";
         return resolveAsFile(id, base) ||
             resolveAsDirectory(id, base) ||
-            (root ? resolveAsNodeModule(id, getParent(root)) : false);
+            (root ? resolveAsNodeModule(id, getParent(root)) : undefined);
     }
     function resolveAsDirectory(id, root) {
         if (root === void 0) { root = ""; }
@@ -185,16 +107,93 @@ module = (typeof module == 'undefined') ? {} : module;
             return { path: file, core: true };
         }
     }
-    function resolveCoreModule(id, root) {
-        print("resolveCoreModule", id, root);
-        var name = normalizeName(id);
-        var classloader = java.lang.Thread.currentThread().getContextClassLoader();
-        if (classloader.getResource(name))
-            return { path: name, core: true };
+    var Require = (function () {
+        function Require(id, parent) {
+            print("require", id, parent);
+            var core, native, file = Require.resolve(id, parent);
+            if (!file) {
+                if (typeof NativeRequire.require === 'function') {
+                    if (Require.debug) {
+                        System.out.println(['Cannot resolve', id, 'defaulting to native'].join(' '));
+                    }
+                    native = NativeRequire.require(id);
+                    if (native)
+                        return native;
+                }
+                System.err.println("Cannot find module " + id);
+                throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
+            }
+            try {
+                if (Require.cache[file.path]) {
+                    return Require.cache[file.path];
+                }
+                else if (String(file.path).endsWith('.js')) {
+                    return Module._load(file.path, parent, file.core);
+                }
+                else if (String(file.path).endsWith('.json')) {
+                    return loadJSON(file.path, file.core);
+                }
+            }
+            catch (ex) {
+                if (ex instanceof java.lang.Exception) {
+                    throw new ModuleError("Cannot load module " + id, "LOAD_ERROR", ex);
+                }
+                else {
+                    System.out.println("Cannot load module " + id + " LOAD_ERROR");
+                    throw ex;
+                }
+            }
+        }
+        Require.resolve = function (id, parent) {
+            print("resolve", id, parent);
+            var roots = findRoots(parent);
+            for (var i = 0; i < roots.length; ++i) {
+                var root = roots[i];
+                var result = resolveCoreModule(id, root) ||
+                    resolveAsFile(id, root, '.js') ||
+                    resolveAsFile(id, root, '.json') ||
+                    resolveAsDirectory(id, root) ||
+                    resolveAsNodeModule(id, root);
+                if (result) {
+                    return result;
+                }
+            }
+        };
+        ;
+        Require.root = '';
+        Require.NODE_PATH = undefined;
+        Require.paths = [];
+        Require.debug = true;
+        Require.extensions = {};
+        return Require;
+    }());
+    require = Require;
+    module.exports = Module;
+    function findRoots(parent) {
+        var r = [];
+        r.push(findRoot(parent));
+        return r.concat(Require.paths);
+    }
+    function findRoot(parent) {
+        if (!parent || !parent.id) {
+            return Require.root;
+        }
+        var pathParts = parent.id.split(/[\/|\\,]+/g);
+        pathParts.pop();
+        return pathParts.join('/');
+    }
+    function loadJSON(file, core) {
+        if (core === void 0) { core = false; }
+        var json = JSON.parse(readFile(file, core));
+        Require.cache[file] = json;
+        return json;
+    }
+    function getParent(root) {
+        return Paths.get(root).getParent() || "";
     }
     function normalizeName(fileName, ext) {
         var extension = ext || '.js';
-        if (fileName.endsWith(extension)) {
+        if (String(fileName).endsWith(extension)) {
             return fileName;
         }
         return fileName + extension;
@@ -214,12 +213,5 @@ module = (typeof module == 'undefined') ? {} : module;
         catch (e) {
             throw new ModuleError("Cannot read file [" + input + "]: ", "IO_ERROR", e);
         }
-    }
-    if (typeof String.prototype.endsWith !== 'function') {
-        String.prototype.endsWith = function (suffix) {
-            if (!suffix)
-                return false;
-            return this.indexOf(suffix, this.length - suffix.length) !== -1;
-        };
     }
 }());

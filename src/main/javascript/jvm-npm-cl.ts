@@ -9,6 +9,7 @@ declare namespace java {
   namespace lang {
     var System:any;
     var Thread:any;
+    var Exception:any;
   }
   namespace io {
     var File:any;
@@ -24,6 +25,14 @@ declare namespace java {
     var Scanner:any;
   }
 
+}
+
+interface FunctionConstructor {
+    new (args: string[], body:string): Function;
+}
+
+interface String {
+  endsWith( suffix:string ):boolean;
 }
 
 declare function print( ...args: Object[] );
@@ -48,7 +57,7 @@ module = (typeof module == 'undefined') ? {} :  module;
     NativeRequire.require = require;
   }
 
-  function ModuleError(message:string, code:string, cause:any) {
+  function ModuleError(message:string, code?:string, cause?:any) {
     this.code = code || "UNDEFINED";
     this.message = message || "Error loading module";
     this.cause = cause;
@@ -85,7 +94,7 @@ module = (typeof module == 'undefined') ? {} :  module;
       if (parent && parent.children) parent.children.push(this);
 
       this.require = function(id) {
-        return Require(id, this);
+        return new Require(id, this);
       }.bind(this);
 
     }
@@ -94,7 +103,7 @@ module = (typeof module == 'undefined') ? {} :  module;
      * _load
      *
      */
-    static _load( file, parent, core:boolean, main:boolean ):any {
+    static _load( file, parent, core:boolean, main?:boolean ):any {
       print( "_load", file, parent, core, main );
 
       var module = new Module(file, parent, core);
@@ -112,7 +121,7 @@ module = (typeof module == 'undefined') ? {} :  module;
 
     static runMain(main) {
       var file = Require.resolve(main);
-      Module._load(file, undefined, false, true);
+      Module._load(file.path, undefined, file.core, true);
 
     }
   }
@@ -122,6 +131,75 @@ module = (typeof module == 'undefined') ? {} :  module;
     core?:boolean;
   }
 
+  function resolveCoreModule(id:string, root:string):ResolveResult {
+      print( "resolveCoreModule", id, root);
+
+      var name = normalizeName(id);
+      var classloader = java.lang.Thread.currentThread().getContextClassLoader();
+      if (classloader.getResource(name))
+          return { path: name, core: true };
+    }
+
+  function resolveAsNodeModule(id:string, root:string):ResolveResult {
+    var base = Paths.get(root, 'node_modules') || "";
+
+    return resolveAsFile(id, base) ||
+      resolveAsDirectory(id, base) ||
+      (root ? resolveAsNodeModule(id, getParent(root)) : undefined);
+  }
+
+  function resolveAsDirectory(id:string, root:string = ""):ResolveResult {
+    print( "resolveAsDirectory", id, root);
+    var base = Paths.get(root, id),
+        file = Paths.get(base, 'package.json'),
+        cl = java.lang.Thread.currentThread().getContextClassLoader();
+
+    var url = cl.getResource( file ); print( file , url );
+
+    if (url!=null) {
+      try {
+        var body = readFile( file, true ),
+            package  = JSON.parse(body);
+        if (package.main) {
+          return (resolveAsFile(package.main, base) ||
+                  resolveAsDirectory(package.main, base));
+        }
+        // if no package.main exists, look for index.js
+        return resolveAsFile( 'index.js', base);
+      } catch(ex) {
+        throw new ModuleError("Cannot load JSON file", "PARSE_ERROR", ex);
+      }
+    }
+    return resolveAsFile('index.js', base);
+  }
+
+  function resolveAsFile(id:string, root, ext?:string):ResolveResult {
+    print( "resolveAsFile", id, root, ext);
+
+    var file, cl = java.lang.Thread.currentThread().getContextClassLoader();
+;
+    if ( id.length > 0 && id[0] === '/' ) {
+      file = normalizeName(id, ext || '.js');
+
+      var url = cl.getResource( file ); print( file , url );
+
+      if (url!=null) {
+        return resolveAsDirectory(id);
+      }
+    } else {
+      //file = [root, normalizeName(id, ext || '.js')].join('/');
+      file = Paths.get(root, normalizeName(id, ext || '.js')).toString();
+
+    }
+    var url = cl.getResource( file ); print( file , url );
+
+    if (url!=null) {
+      return { path:file, core:true };
+    }
+  }
+
+
+
   class Require {
     static root = '';
     static NODE_PATH = undefined;
@@ -130,7 +208,7 @@ module = (typeof module == 'undefined') ? {} :  module;
     static cache:[any];
     static extensions = {};
 
-    static resolve(id, parent?):ResolveResult {
+    static resolve(id:string, parent?):ResolveResult {
         print( "resolve", id, parent );
 
         var roots = findRoots(parent);
@@ -146,6 +224,7 @@ module = (typeof module == 'undefined') ? {} :  module;
           }
         }
       };
+
 
   constructor(id:string, parent:any){
         print( "require", id, parent );
@@ -165,17 +244,13 @@ module = (typeof module == 'undefined') ? {} :  module;
         }
 
 
-        if (file.core) {
-          file = file.path;
-          core = true;
-        }
         try {
-          if (Require.cache[file]) {
-            return Require.cache[file];
-          } else if (file.endsWith('.js')) {
-            return Module._load(file, parent, core);
-          } else if (file.endsWith('.json')) {
-            return loadJSON(file);
+          if (Require.cache[file.path]) {
+            return Require.cache[file.path];
+          } else if (String(file.path).endsWith('.js')) {
+            return Module._load(file.path, parent, file.core);
+          } else if (String(file.path).endsWith('.json')) {
+            return loadJSON(file.path, file.core);
           }
         } catch(ex) {
           if (ex instanceof java.lang.Exception) {
@@ -209,8 +284,8 @@ module = (typeof module == 'undefined') ? {} :  module;
 
 
 
-  function loadJSON(file) {
-    var json = JSON.parse(readFile(file,true));
+  function loadJSON(file:string, core:boolean = false) {
+    var json = JSON.parse(readFile(file,core));
     Require.cache[file] = json;
     return json;
   }
@@ -220,76 +295,11 @@ module = (typeof module == 'undefined') ? {} :  module;
 
   }
 
-  function resolveAsNodeModule(id:string, root:string) {
-    var base = Paths.get(root, 'node_modules') || "";
-
-    return resolveAsFile(id, base) ||
-      resolveAsDirectory(id, base) ||
-      (root ? resolveAsNodeModule(id, getParent(root)) : false);
-  }
-
-  function resolveAsDirectory(id:string, root:string = "") {
-    print( "resolveAsDirectory", id, root);
-    var base = Paths.get(root, id),
-        file = Paths.get(base, 'package.json'),
-        cl = java.lang.Thread.currentThread().getContextClassLoader();
-
-    var url = cl.getResource( file ); print( file , url );
-
-    if (url!=null) {
-      try {
-        var body = readFile( file, true ),
-            package  = JSON.parse(body);
-        if (package.main) {
-          return (resolveAsFile(package.main, base) ||
-                  resolveAsDirectory(package.main, base));
-        }
-        // if no package.main exists, look for index.js
-        return resolveAsFile('index.js', base);
-      } catch(ex) {
-        throw new ModuleError("Cannot load JSON file", "PARSE_ERROR", ex);
-      }
-    }
-    return resolveAsFile('index.js', base);
-  }
-
-  function resolveAsFile(id:string, root, ext?:string) {
-    print( "resolveAsFile", id, root, ext);
-
-    var file, cl = java.lang.Thread.currentThread().getContextClassLoader();
-;
-    if ( id.length > 0 && id[0] === '/' ) {
-      file = normalizeName(id, ext || '.js');
-
-      var url = cl.getResource( file ); print( file , url );
-
-      if (url!=null) {
-        return resolveAsDirectory(id);
-      }
-    } else {
-      //file = [root, normalizeName(id, ext || '.js')].join('/');
-      file = Paths.get(root, normalizeName(id, ext || '.js')).toString();
-
-    }
-    var url = cl.getResource( file ); print( file , url );
-
-    if (url!=null) {
-      return { path:file, core:true };
-    }
-  }
-
-  function resolveCoreModule(id:string, root:string) {
-    print( "resolveCoreModule", id, root);
-
-    var name = normalizeName(id);
-    var classloader = java.lang.Thread.currentThread().getContextClassLoader();
-    if (classloader.getResource(name))
-        return { path: name, core: true };
-  }
 
   function normalizeName(fileName:string, ext?:string) {
     var extension = ext || '.js';
-    if (fileName.endsWith(extension)) {
+
+    if (String(fileName).endsWith(extension)) {
       return fileName;
     }
     return fileName + extension;
@@ -311,6 +321,8 @@ module = (typeof module == 'undefined') ? {} :  module;
     }
   }
 
+/*
+  function endsWith( s:string, suffix:string ):number
   // Helper function until ECMAScript 6 is complete
   if (typeof String.prototype.endsWith !== 'function') {
 
@@ -319,6 +331,6 @@ module = (typeof module == 'undefined') ? {} :  module;
         return this.indexOf(suffix, this.length - suffix.length) !== -1;
       };
   }
-
+*/
 
 }());
