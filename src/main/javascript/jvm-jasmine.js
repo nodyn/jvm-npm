@@ -123,7 +123,7 @@ function expect( condition ) {
         throw new Error(msg);
     }
     function _toBeUndefined() {
-        if( condition === 'undefined' ) return;
+        if( condition == 'undefined' || condition === undefined ) return;
 
         var msg =  "expect undefined but is " + condition ;
         throw new Error(msg);

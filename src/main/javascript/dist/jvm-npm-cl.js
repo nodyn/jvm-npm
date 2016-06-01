@@ -40,7 +40,6 @@ module = (typeof module == 'undefined') ? {} : module;
             configurable: true
         });
         Module._load = function (file, parent, core, main) {
-            print("_load", file, parent, core, main);
             var module = new Module(file, parent, core);
             var __FILENAME__ = module.filename;
             var body = readFile(module.filename, module.core), dir = new File(module.filename).getParent(), args = ['exports', 'module', 'require', '__filename', '__dirname'], func = new Function(args, body);
@@ -56,7 +55,6 @@ module = (typeof module == 'undefined') ? {} : module;
         return Module;
     }());
     function resolveCoreModule(id, root) {
-        print("resolveCoreModule", id, root);
         var name = normalizeName(id);
         if (isResourceResolved(name))
             return { path: name, core: true };
@@ -68,7 +66,6 @@ module = (typeof module == 'undefined') ? {} : module;
             (root ? resolveAsNodeModule(id, root.getParent()) : undefined);
     }
     function resolveAsDirectory(id, root) {
-        print("resolveAsDirectory", id, root);
         var base = mergePath(id, root), file = base.resolve('package.json').toString();
         ;
         if (isResourceResolved(file)) {
@@ -87,7 +84,6 @@ module = (typeof module == 'undefined') ? {} : module;
     }
     function resolveAsFile(id, root, ext) {
         var file = mergePath(id, root).toString();
-        print("resolveAsFile", id, root, ext, file);
         file = normalizeName(file, ext || '.js');
         if (file.length > 0 && file[0] === '/') {
             if (isResourceResolved(file)) {
@@ -101,7 +97,6 @@ module = (typeof module == 'undefined') ? {} : module;
     function isResourceResolved(id) {
         var cl = Thread.currentThread().getContextClassLoader();
         var url = cl.getResource(id);
-        print("\tisResourceResolved", url != null, id);
         return url != null;
     }
     function findRoots(parent) {
@@ -128,7 +123,6 @@ module = (typeof module == 'undefined') ? {} : module;
     }
     var Require = (function () {
         function Require(id, parent) {
-            print("require", id, parent);
             var file = Require.resolve(id, parent);
             if (!file) {
                 if (typeof NativeRequire.require === 'function') {
@@ -143,7 +137,6 @@ module = (typeof module == 'undefined') ? {} : module;
                 throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
             }
             try {
-                print("Require.cache.get", file.path);
                 if (Require.cache[file.path]) {
                     return Require.cache[file.path];
                 }
@@ -165,7 +158,6 @@ module = (typeof module == 'undefined') ? {} : module;
             }
         }
         Require.resolve = function (id, parent) {
-            print("resolve", id, parent);
             var roots = findRoots(parent);
             for (var i = 0; i < roots.length; ++i) {
                 var root = Paths.get(roots[i]);
@@ -203,7 +195,6 @@ module = (typeof module == 'undefined') ? {} : module;
         return fileName + extension;
     }
     function readFile(filename, core) {
-        print('\treadFile', filename, core);
         var input;
         try {
             if (core) {

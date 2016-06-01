@@ -5,59 +5,7 @@
  */
 
 
-
-
-declare namespace java {
-
-  namespace lang {
-    var System:any;
-    var Thread:any;
-    var Exception:any;
-    var Thread:any;
-  }
-  namespace io {
-    var File:any;
-  }
-  namespace nio {
-
-    namespace file {
-      interface Path {
-        toString():string;
-        normalize():Path;
-        resolve( p:string ):Path;
-        getParent():Path;
-        startsWith( p:Path ):boolean;
-      }
-
-      var Paths:any;
-      var Path:any;
-    }
-  }
-  namespace util {
-    var Scanner:any;
-  }
-
-}
-
-interface Parent {
-  id:string;
-}
-
-interface FunctionConstructor {
-    new (args: string[], body:string): Function;
-}
-
-interface String {
-  endsWith( suffix:string ):boolean;
-}
-
-declare function print( ...args: Object[] );
-
-declare var module:any;
-declare var require:Function;
-declare var NativeRequire:any;
-declare var Require:any;
-
+ /// <reference path="jvm-npm.d.ts" />
 
 module = (typeof module == 'undefined') ? {} :  module;
 
@@ -121,7 +69,7 @@ module = (typeof module == 'undefined') ? {} :  module;
      *
      */
     static _load( file, parent:Module, core:boolean, main?:boolean ):any {
-      print( "_load", file, parent, core, main );
+      // print( "_load", file, parent, core, main );
 
       var module = new Module(file, parent, core);
       var __FILENAME__ = module.filename;
@@ -149,7 +97,7 @@ module = (typeof module == 'undefined') ? {} :  module;
   }
 
   function resolveCoreModule(id:string, root:Path):ResolveResult {
-      print( "resolveCoreModule", id, root);
+      // print(  "resolveCoreModule", id, root);
 
       var name = normalizeName(id);
 
@@ -167,7 +115,7 @@ module = (typeof module == 'undefined') ? {} :  module;
 
   function resolveAsDirectory(id:string, root?:Path):ResolveResult {
 
-    print( "resolveAsDirectory", id, root);
+    // print(  "resolveAsDirectory", id, root);
 
     var base = mergePath(id,root),
         file = base.resolve('package.json').toString();
@@ -200,7 +148,7 @@ module = (typeof module == 'undefined') ? {} :  module;
 
     var file = mergePath(id,root).toString();
 
-    print( "resolveAsFile", id, root, ext, file);
+    // print(  "resolveAsFile", id, root, ext, file);
 
     file = normalizeName(file, ext || '.js');
 
@@ -221,7 +169,7 @@ module = (typeof module == 'undefined') ? {} :  module;
 
     var url = cl.getResource( id );
 
-    print( "\tisResourceResolved", url!=null, id );
+    // print(  "\tisResourceResolved", url!=null, id );
 
     return url!=null;
   }
@@ -263,7 +211,7 @@ module = (typeof module == 'undefined') ? {} :  module;
     static extensions = {};
 
     static resolve(id:string, parent?:Module):ResolveResult {
-        print( "resolve", id, parent );
+        // print(  "resolve", id, parent );
 
         var roots = findRoots(parent);
         for ( var i = 0 ; i < roots.length ; ++i ) {
@@ -283,7 +231,7 @@ module = (typeof module == 'undefined') ? {} :  module;
 
 
   constructor(id:string, parent:Module){
-        print( "require", id, parent );
+        // print(  "require", id, parent );
 
         var file = Require.resolve(id, parent);
 
@@ -301,7 +249,7 @@ module = (typeof module == 'undefined') ? {} :  module;
 
 
         try {
-          print( "Require.cache.get", file.path);
+          // print(  "Require.cache.get", file.path);
 
           if (Require.cache[file.path]) {
             return Require.cache[file.path];
@@ -340,7 +288,7 @@ module = (typeof module == 'undefined') ? {} :  module;
   }
 
   function readFile(filename:string, core:boolean) {
-    print( '\treadFile', filename, core);
+    // print(  '\treadFile', filename, core);
     var input;
     try {
       if (core) {
