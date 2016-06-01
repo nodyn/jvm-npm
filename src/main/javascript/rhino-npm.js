@@ -139,12 +139,8 @@ module = (typeof module == 'undefined') ? {} :  module;
   }
      
   function findRoot(parent) {
-    if (!parent || !parent.id) { 
-        return Require.root; 
-    }
-    var path = Paths.get( parent.id ).getParent();
-    
-    return  (path) ? path.toString() : "";
+    if (!parent || !parent.id) { return Require.root; }
+    return Paths.get( parent.id ).getParent() || "";
   }
 
 
