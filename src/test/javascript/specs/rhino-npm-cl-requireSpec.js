@@ -28,8 +28,23 @@ beforeEach( function() {
   require.cache = [];
 });
 
+describe("NativeRequire", function() {
+
+  it("should be a global object", function(){
+    expect(typeof NativeRequire).toBe('object');
+  });
+
+  it("should expose DynJS' builtin require() function", function(){
+    expect(typeof NativeRequire.require).toBe('function');
+    var f = NativeRequire.require('./lib-cl/native_test_module');
+    expect(f).toBe("Foo!");
+    expect(NativeRequire.require instanceof org.dynjs.runtime.builtins.Require)
+      .toBe(true);
+  });
+
+}, {disable:true} );
+
 describe("NPM global require()", function() {
-  require.cache = [];
 
   it("should be a function", function() {
     expect(typeof require).toBe('function');
@@ -48,32 +63,21 @@ describe("NPM global require()", function() {
   });
 
   it("should throw an Error if a file can't be found", function() {
-    expect( function() {require('not_found.js');} ).toThrow(new Error('Cannot find module not_found.js'));
+    expect(function() {require('./not_found.js');}).toThrow(new Error('Cannot find module ./not_found.js'));
     try {
       require('./not_found.js');
     } catch(e) {
-      expect(e.code).toBeDefined();
+      expect(e.code).toBe('MODULE_NOT_FOUND');
     }
   });
 
   it("should not wrap errors encountered when loading a module", function() {
     try {
-      require('lib-cl/throws');
+      require('./lib-cl/throws');
     } catch(ex) {
       print(ex);
       expect(ex instanceof ReferenceError).toBeTruthy();
     }
-  });
-
-  it("should return the a .json file as a JSON object", function() {
-    var json = require('lib-cl/some_data.json');
-    expect(json.description).toBe("This is a JSON file");
-    expect(json.data).toEqual([1,2,3]);
-  });
-
-  it("outer.quadruple is defined ", function() {
-    var outer = require('lib-cl/outer');
-    expect(outer.quadruple).toBeDefined();
   });
 
   it("should support nested requires", function() {
@@ -86,11 +90,11 @@ describe("NPM global require()", function() {
     expect(outer.quadruple(2)).toBe(8);
   });
 
-  it("outer.filename is defined", function() {
-    var outer = require('lib-cl/outer.js');
-    expect(outer.filename).toBeDefined();
+  it("should return the a .json file as a JSON object", function() {
+    var json = require('./lib-cl/some_data.json');
+    expect(json.description).toBe("This is a JSON file");
+    expect(json.data).toEqual([1,2,3]);
   });
-
 
   it("should cache modules in require.cache", function() {
     var outer = require('./lib-cl/outer.js');
@@ -98,29 +102,43 @@ describe("NPM global require()", function() {
     var outer2 = require('./lib-cl/outer.js');
     expect(outer2).toBe(outer);
   });
-/*
+
   it("should handle cyclic dependencies", function() {
-    var main = require('lib-cl/cyclic');
+    var main = require('./lib-cl/cyclic');
     expect(main.a.fromA).toBe('Hello from A');
     expect(main.b.fromB).toBe('Hello from B');
   });
-*/
+});
 
+describe("folders as modules", function() {
+  it("should find package.json in a module folder", function() {
+    var package = require('./lib-cl/other_package');
+    expect(package.flavor).toBe('cool ranch');
+    expect(package.subdir).toBe('lib-cl/other_package/lib/subdir');
+  });
+
+  it('should load package.json main property even if it is a directory', function() {
+    var cheese = require('./lib-cl/cheese');
+    expect(cheese.flavor).toBe('nacho');
+  });
+
+  it("should find index.js in a directory, if no package.json exists", function() {
+    var package = require('./lib-cl/my_package');
+    expect(package.data).toBe('Hello!');
+  });
 
 });
 
-
-/*
 describe("NPM Module execution context", function() {
 
   it("should have a __dirname property", function() {
     var top = require('./lib-cl/simple_module');
-    expect(top.dirname).toBe([cwd, 'lib'].join('/'));
+    expect(top.dirname).toBe('./lib-cl');
   });
 
   it("should have a __filename property", function() {
     var top = require('./lib-cl/simple_module');
-    expect(top.filename).toBe([cwd, 'lib-cl/simple_module.js'].join('/'));
+    expect(top.filename).toBe('./lib-cl/simple_module.js');
   });
 
   it("should not expose private module functions globally", function() {
@@ -130,18 +148,19 @@ describe("NPM Module execution context", function() {
 
   it("should have a parent property", function() {
     var outer = require('./lib-cl/outer');
-    expect(outer.innerParent.id).toBe([cwd, 'lib-cl/outer.js'].join('/'));
+    expect(outer.innerParent.id).toBe('./lib-cl/outer.js');
   });
 
   it("should have a filename property", function() {
     var outer = require('./lib-cl/outer');
-    expect(outer.filename).toBe([cwd, 'lib-cl/outer.js'].join('/'));
+    expect(outer.filename).toBe('./lib-cl/outer.js');
   });
 
   it("should have a children property", function() {
     var outer = require('./lib-cl/outer');
     expect(outer.children.length).toBe(1);
-    expect(outer.children[0].id).toBe([cwd, 'lib-cl/sub/inner.js'].join('/'));
+    //expect(outer.children[0].id).toBe('./lib-cl/sub/inner.js');
+    expect(outer.children[0].id).toBe('lib-cl/sub/inner.js');
   });
 
   it("should support setting the 'free' exports variable", function() {
@@ -150,10 +169,9 @@ describe("NPM Module execution context", function() {
   });
 
 });
-*/
 
-/*
 describe("module isolation", function() {
+
   it("should expose global variables and not expose 'var' declared variables", function() {
     var top = require( './lib-cl/isolation/module-a.js');
     expect(doLeak).toBe("cheddar");
@@ -177,9 +195,7 @@ describe("module isolation", function() {
     }
   });
 });
-*/
 
-/*
 describe("cyclic with replacement of module.exports", function() {
   it( "should have the same sense of an object in all places", function() {
     var Stream = require( "./lib-cl/cyclic2/stream.js" );
@@ -190,9 +206,7 @@ describe("cyclic with replacement of module.exports", function() {
 
   });
 });
-*/
 
-/*
 describe("Core modules", function() {
   it("should be found on the classpath", function() {
     var core = require('core');
@@ -207,8 +221,29 @@ describe("Core modules", function() {
     expect( typeof Core.Child.Core ).toBe( "function" );
 
   });
-});
-*/
+}, {disable:false});
 
+describe("Path management", function() {
+  it( "should respect NODE_PATH variable", function() {
+    require.NODE_PATH = 'foo:bar';
+    var results = require.paths();
+    expect( results[0] ).toBe( home + "/.node_modules" );
+    expect( results[1] ).toBe( home + "/.node_libraries" );
+    expect( results[2] ).toBe( 'foo' );
+    expect( results[3] ).toBe( 'bar' );
+  });
+}, {disable:true} );
+
+describe("The Module module", function() {
+  it('should exist', function() {
+    var Module = require('dist/jvm-npm-cl');
+    expect(Module).toBeTruthy();
+  });
+
+  it('should have a runMain function', function() {
+    var Module = require('dist/jvm-npm-cl');
+    expect(typeof Module.runMain).toBe('function');
+  });
+});
 
 report();

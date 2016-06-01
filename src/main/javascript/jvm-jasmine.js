@@ -30,12 +30,12 @@ function beforeEach( cb ) {
     jasmine.beforeEach = cb;
 }
 
-function describe( msg, cb, disable ) {
+function describe( msg, cb, config ) {
     this.fail = function( m ) {
         throw new Error(m);
     };
 
-    this.disable = ( disable || false  );
+    this.config = config || {};
 
     out.println( msg );
 
@@ -44,14 +44,20 @@ function describe( msg, cb, disable ) {
     cb.call(this);
 }
 
-function it( msg, cb, disable ) {
-
-    if(disable === undefined && this.disable ) return
-    if( disable ) return;
-
-    ++jasmine.nTest;
+function it( msg, cb, config ) {
 
     out.print( "\t"); out.print(msg);
+
+    if( !config && this.config['disable'] ) {
+      out.println( " ....skipped");
+      return;
+    }
+    if( config && config['disable'] ) {
+      out.println( " ....skipped");
+      return;
+    }
+
+    ++jasmine.nTest;
 
     try {
         cb();
@@ -80,18 +86,18 @@ function expect( condition ) {
 
     function _toBeTruthy() {
 
-            if( condition ) return;
+        if( condition ) return;
 
-            var msg =  "expect true but is false" ;
-            throw new Error(msg);
+        var msg =  "expect true but is false" ;
+        throw new Error(msg);
 
     }
     function _toBeFalsy() {
 
-            if( !condition ) return;
+        if( !condition ) return;
 
-            var msg =  "expect false but is true" ;
-            throw new Error(msg);
+        var msg =  "expect false but is true" ;
+        throw new Error(msg);
 
     }
     function _toBeNull() {
@@ -117,7 +123,7 @@ function expect( condition ) {
         throw new Error(msg);
     }
     function _toBeUndefined() {
-        if( condition == undefined ) return;
+        if( condition === 'undefined' ) return;
 
         var msg =  "expect undefined but is " + condition ;
         throw new Error(msg);

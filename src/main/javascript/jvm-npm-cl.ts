@@ -237,11 +237,11 @@ module = (typeof module == 'undefined') ? {} :  module;
   function findRoot(parent:Module):string {
     if (!parent || !parent.id) { return Require.root; }
 
-    if( parent.id instanceof java.nio.file.Path ) {
-      return (parent.id as Path).getParent().toString();
-    }
+    var path = ( parent.id instanceof java.nio.file.Path ) ?
+      (parent.id as Path) :
+      Paths.get( parent.id );
 
-    return Paths.get( parent.id ).getParent().toString();
+    return path.getParent() || "";
 
   }
 
