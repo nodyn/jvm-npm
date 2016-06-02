@@ -17,9 +17,9 @@ var cwd = Paths.get(
 System.setProperty('user.dir', cwd); // set current dir
 
 // Load the NPM module loader into the global scope
-load('src/main/javascript/dist/jvm-rhino-cl-npm.js');
+load('src/main/typescript/dist/jvm-rhino-cl-npm.js');
 
-load('src/main/javascript/jvm-jasmine.js');
+load('src/test/javascript/jvm-jasmine.js');
 
 var __dirname = "dirname";
 var __filename = "filename";

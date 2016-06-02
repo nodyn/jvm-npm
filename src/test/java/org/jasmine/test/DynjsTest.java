@@ -43,7 +43,7 @@ public class DynjsTest {
         DynJS dynjs = new DynJS(config);
 
         dynjs.evaluate("require.addLoadPath('/')");
-        dynjs.evaluate("load('src/main/javascript/jvm-jasmine.js');");
+        dynjs.evaluate("load('src/test/javascript/jvm-jasmine.js');");
         dynjs.evaluate("load('src/test/javascript/specs/dynjs-npm-requireSpec.js');");
 
         dynjs.evaluate("report();");

@@ -16,6 +16,8 @@ var cwd = Paths.get(
 
 var home = System.getProperty('user.home');
 
+load('src/test/javascript/jvm-jasmine.js');
+
 System.setProperty('user.dir', cwd); // set current dir
 
 
@@ -27,9 +29,6 @@ require.paths = [
 
 var __dirname = "dirname";
 var __filename = "filename";
-
-load('src/main/javascript/jvm-jasmine.js');
-
 
 describe("NPM global require()", function() {
   require.cache = [];

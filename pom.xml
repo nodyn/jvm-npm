@@ -48,16 +48,16 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.dynjs</groupId>
-      <artifactId>dynjs</artifactId>
-      <version>${version.dynjs}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.mozilla</groupId>
       <artifactId>rhino</artifactId>
       <version>1.7.7.1</version>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.dynjs</groupId>
+      <artifactId>dynjs</artifactId>
+      <version>${version.dynjs}</version>
       <scope>test</scope>
     </dependency>
 
@@ -152,7 +152,7 @@
                 </configuration>
             </execution>
         </executions>
- 
+
       </plugin>
     </plugins>
   </build>

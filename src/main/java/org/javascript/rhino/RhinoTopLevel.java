@@ -24,8 +24,6 @@ import static org.mozilla.javascript.ScriptableObject.DONTENUM;
 import static java.lang.String.format;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import static org.javascript.rhino.Console.err;
-import static org.javascript.rhino.Console.log;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.commonjs.module.ModuleScriptProvider;
@@ -33,6 +31,7 @@ import org.mozilla.javascript.commonjs.module.Require;
 import org.mozilla.javascript.commonjs.module.RequireBuilder;
 import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProvider;
 import org.mozilla.javascript.commonjs.module.provider.StrongCachingModuleScriptProvider;
+import static java.lang.String.format;
 
 /**
  *
@@ -40,7 +39,7 @@ import org.mozilla.javascript.commonjs.module.provider.StrongCachingModuleScript
  */
 public class RhinoTopLevel extends ImporterTopLevel {
 
-    
+
     /**
      * print function exported to javascript
      *
@@ -79,7 +78,7 @@ public class RhinoTopLevel extends ImporterTopLevel {
         }
 
         RhinoTopLevel _this = null;
-        
+
         if( thisObj instanceof RhinoTopLevel ) {
             _this = (RhinoTopLevel) thisObj;
         }
@@ -97,35 +96,32 @@ public class RhinoTopLevel extends ImporterTopLevel {
         for (Object a : args) {
 
             final String module = Context.toString(a);
-            
+
             _this._load(cx, module);
         }
     }
 
-    private java.util.Set<String> moduleCache = new java.util.HashSet<>();
-    
+    private final java.util.Set<String> moduleCache = new java.util.HashSet<>();
+
     private void _load(Context cx, String module) {
-        
+
         if( moduleCache.contains(module)) {
             return;
         }
-        
-        log( "loading module [%s]", module);
-        
+
         final ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        
+
         final java.io.InputStream is = cl.getResourceAsStream(module);
 
         if (is != null) {
 
             try {
                 cx.evaluateReader(this, new java.io.InputStreamReader(is), module, 0, null);
-                
+
                 moduleCache.add( module );
-                
+
             } catch (IOException e) {
-                err("error evaluating module [%s]", module, e);
-                return;
+                throw new RuntimeException(format("error evaluating module [%s]", module), e);
             }
 
         } else { // Fallback
@@ -133,14 +129,10 @@ public class RhinoTopLevel extends ImporterTopLevel {
             java.io.File file = new java.io.File(module);
 
             if (!file.exists()) {
-                err("module [%s] doesn't exist!", module);
-                return;
-
+                throw new RuntimeException(format("module [%s] doesn't exist!", module));
             }
             if (!file.isFile()) {
-                err("module [%s] is not a file exist!", module);
-                return;
-
+                throw new RuntimeException(format("module [%s] is not a file exist!", module));
             }
 
             try {
@@ -151,8 +143,7 @@ public class RhinoTopLevel extends ImporterTopLevel {
                 moduleCache.add( module );
 
             } catch (IOException e) {
-                err("error evaluating module [%s]", module, e);
-                return;
+                throw new RuntimeException(format("error evaluating module [%s]", module), e);
             }
 
         }
@@ -174,7 +165,7 @@ public class RhinoTopLevel extends ImporterTopLevel {
      */
     public RhinoTopLevel(Context cx, boolean sealed) {
         super(cx, sealed);
-        
+
     }
 
     public static void loadModule(Context cx, Scriptable scope, String moduleName) {
@@ -186,11 +177,11 @@ public class RhinoTopLevel extends ImporterTopLevel {
             throw new RuntimeException(format("error evaluating [%s]!", moduleName), e);
         }
     }
-    
+
     public static void installNativeRequire(Context cx, Scriptable globalScope, Scriptable scope,  final ModuleSourceProvider sourceProvider) {
-        
+
         final ModuleScriptProvider scriptProvider = new StrongCachingModuleScriptProvider(sourceProvider);
-        
+
         final Script preExec = null;
         final Script postExec = null;
         final boolean sandboxed = false;
@@ -203,9 +194,9 @@ public class RhinoTopLevel extends ImporterTopLevel {
                 .createRequire(cx, globalScope);
 
         require.install(scope);
-        
+
     }
-    
+
     @Override
     public void initStandardObjects(Context cx, boolean sealed) {
         super.initStandardObjects(cx, sealed);

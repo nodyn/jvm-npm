@@ -19,7 +19,7 @@ var home = System.getProperty('user.home');
 System.setProperty('user.dir', cwd); // set current dir
 
 // Load the NPM module loader into the global scope
-load('src/main/javascript/dist/jvm-rhino-npm.js');
+load('src/main/typescript/dist/jvm-rhino-npm.js');
 
 require.root = cwd;
 require.paths = [
@@ -28,7 +28,7 @@ require.paths = [
 ];
 
 
-load('src/main/javascript/jvm-jasmine.js');
+load('src/test/javascript/jvm-jasmine.js');
 
 
 describe("NativeRequire", function() {

@@ -33,49 +33,49 @@ public class RhinoTest {
                System.out.printf( "CONTEXT RELEASED [%s] Thread [%d]\n", cntxt, Thread.currentThread().getId());
            }
         };
-    
+
     @Before
     public void initFactory() {
         contextFactory = new ContextFactory();
-    
+
         contextFactory.addListener( l );
-        
+
     }
 
     @After
     public void releaseFactory() {
-        
+
         contextFactory.removeListener( l );
-        
+
         contextFactory = null;
     }
-    
+
     @Ignore
     @Test
     public void dummy() {
 
-    }    
-   
-    @Test 
+    }
+
+    @Test
     public void rhino_npm_js_test(){
         final ModuleSourceProvider sourceProvider = new RhinoModuleSourceProvider();
         contextFactory.call( new ContextAction() {
-           
+
             @Override
             public Object run(Context cx) {
                 final RhinoTopLevel topLevel = new RhinoTopLevel(cx);
-                
+
                 Scriptable newScope = cx.newObject(topLevel);
                 newScope.setPrototype(topLevel);
                 //newScope.setParentScope(null);
-                
+
                 RhinoTopLevel.installNativeRequire(cx, newScope, topLevel,sourceProvider);
                 RhinoTopLevel.loadModule(cx, newScope, "src/test/javascript/specs/rhino-npm-native-requireSpec.js");
-                
+
                 return newScope;
            }
         });
-     
+
     }
 
     @Test
@@ -83,28 +83,7 @@ public class RhinoTest {
         final ModuleSourceProvider sourceProvider = new RhinoModuleSourceProvider();
 
         contextFactory.call( new ContextAction() {
-           
-            @Override
-            public Object run(Context cx) {
-                final RhinoTopLevel topLevel = new RhinoTopLevel(cx);
-                
-                Scriptable newScope = cx.newObject(topLevel);
-                newScope.setPrototype(topLevel);
-                //newScope.setParentScope(null);
-                
-                RhinoTopLevel.installNativeRequire(cx, newScope, topLevel, sourceProvider);
-                loadModule(cx, newScope, "src/test/javascript/specs/rhino-native-requireSpec.js");
-                
-                return newScope;
-           }
-        });
-                
-    }
-    
-    @Test
-    public void rhino_npm_only_js_test(){
-        contextFactory.call( new ContextAction() {
-           
+
             @Override
             public Object run(Context cx) {
                 final RhinoTopLevel topLevel = new RhinoTopLevel(cx);
@@ -112,14 +91,35 @@ public class RhinoTest {
                 Scriptable newScope = cx.newObject(topLevel);
                 newScope.setPrototype(topLevel);
                 //newScope.setParentScope(null);
-                
-                loadModule(cx, newScope, "src/test/javascript/specs/rhino-npm-requireSpec.js");
-                
+
+                RhinoTopLevel.installNativeRequire(cx, newScope, topLevel, sourceProvider);
+                loadModule(cx, newScope, "src/test/javascript/specs/rhino-native-requireSpec.js");
+
                 return newScope;
            }
         });
-        
-        
+
     }
-    
+
+    @Test
+    public void rhino_npm_only_js_test(){
+        contextFactory.call( new ContextAction() {
+
+            @Override
+            public Object run(Context cx) {
+                final RhinoTopLevel topLevel = new RhinoTopLevel(cx);
+
+                Scriptable newScope = cx.newObject(topLevel);
+                newScope.setPrototype(topLevel);
+                //newScope.setParentScope(null);
+
+                loadModule(cx, newScope, "src/test/javascript/specs/rhino-npm-requireSpec.js");
+
+                return newScope;
+           }
+        });
+
+
+    }
+
 }
