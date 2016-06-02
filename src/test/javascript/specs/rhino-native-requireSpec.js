@@ -170,12 +170,12 @@ describe("Core modules", function() {
 
 describe("The Module module", function() {
   it('should exist', function() {
-    var Module = require('dist/rhino-npm');
+    var Module = require('jvm-rhino-npm');
     expect(Module).toBeTruthy();
   });
 
   it('should have a runMain function', function() {
-    var Module = require('dist/rhino-npm');
+    var Module = require('jvm-rhino-npm');
     expect(typeof Module.runMain).toBe('function');
   });
 });
