@@ -1,6 +1,6 @@
 /**
  *
- * JVM-NPM THAT LOOKUP MODULES EXCLUSIVELY IN CLASSPATH
+ * JVM-NPM TYPESCRIPT DEFINITION
  *
  */
 declare namespace java {
