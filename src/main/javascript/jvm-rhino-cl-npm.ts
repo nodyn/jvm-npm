@@ -1,11 +1,11 @@
 /**
  *
- * JVM-NPM THAT LOOKUP MODULES EXCLUSIVELY IN CLASSPATH
+ * JVM-NPM TAILORED FOR RHINO THAT LOOKUP MODULES EXCLUSIVELY IN CLASSPATH
  *
  */
 
 
- /// <reference path="jvm-npm.d.ts" />
+/// <reference path="jvm-npm.d.ts" />
 
 module = (typeof module == 'undefined') ? {} :  module;
 
@@ -17,7 +17,6 @@ module = (typeof module == 'undefined') ? {} :  module;
       Paths = java.nio.file.Paths,
       Thread = java.lang.Thread
       ;
-      type Path = java.nio.file.Path;
 
   NativeRequire = (typeof NativeRequire === 'undefined') ? {} : NativeRequire;
   if (typeof require === 'function' && !NativeRequire.require) {
@@ -52,18 +51,6 @@ module = (typeof module == 'undefined') ? {} :  module;
       this._exports = val;
     }
 
-    constructor( public id:string|Path, private parent:Module, private core:boolean) {
-      this.filename = id as string;
-
-      if (parent && parent.children) parent.children.push(this);
-
-      this.require = (id) => {
-        return new Require(id, this);
-      }
-
-      this.exports = {};
-    }
-
     /**
      * _load
      *
@@ -89,11 +76,86 @@ module = (typeof module == 'undefined') ? {} :  module;
       Module._load(file.path, undefined, file.core, true);
 
     }
+
+    constructor( public id:string|Path, private parent:Module, private core:boolean) {
+      this.filename = id as string;
+
+      if (parent && parent.children) parent.children.push(this);
+
+      this.require = (id) => {
+        return Require.call(this, id, this);
+      }
+
+      this.exports = {};
+    }
   }
 
-  interface ResolveResult {
-    path:string;
-    core?:boolean;
+
+  class Require {
+      static root = '';
+      static NODE_PATH = undefined;
+      static paths:Array<string> = [];
+      static debug = true;
+      static cache:[any];
+      static extensions = {};
+
+      static resolve(id:string, parent?:Module):ResolveResult {
+          // print(  "resolve", id, parent );
+
+          var roots = findRoots(parent);
+          for ( var i = 0 ; i < roots.length ; ++i ) {
+            var root = Paths.get(roots[i]);
+            var result =
+              resolveCoreModule(id, root)       ||
+              resolveAsFile(id, root, '.js')    ||
+              resolveAsFile(id, root, '.json')  ||
+              resolveAsDirectory(id, root)      ||
+              resolveAsNodeModule(id, root);
+
+              if ( result ) {
+                return result;
+              }
+          }
+        };
+
+
+    constructor(id:string, parent:Module){
+          // print(  "require", id, parent );
+
+          var file = Require.resolve(id, parent);
+
+          if (!file) {
+            if (typeof NativeRequire.require === 'function') {
+              if (Require.debug) {
+                System.out.println(['Cannot resolve', id, 'defaulting to native'].join(' '));
+              }
+              var native = NativeRequire.require(id);
+              if (native) return native;
+            }
+            System.err.println("Cannot find module " + id);
+            throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
+          }
+
+
+          try {
+            // print(  "Require.cache.get", file.path);
+
+            if (Require.cache[file.path]) {
+              return Require.cache[file.path];
+            } else if (String(file.path).endsWith('.js')) {
+              return Module._load(file.path, parent, file.core);
+            } else if (String(file.path).endsWith('.json')) {
+              return loadJSON(file.path, file.core);
+            }
+          } catch(ex) {
+            if (ex instanceof java.lang.Exception) {
+              throw new ModuleError("Cannot load module " + id, "LOAD_ERROR", ex);
+            } else {
+              System.out.println("Cannot load module " + id + " LOAD_ERROR");
+              throw ex;
+            }
+          }
+        }
   }
 
   function resolveCoreModule(id:string, root:Path):ResolveResult {
@@ -200,73 +262,6 @@ module = (typeof module == 'undefined') ? {} :  module;
     if( root && !path.startsWith(root) ) path = Paths.get( root, id );
 
     return path.normalize();
-  }
-
-  class Require {
-    static root = '';
-    static NODE_PATH = undefined;
-    static paths:Array<string> = [];
-    static debug = true;
-    static cache:[any];
-    static extensions = {};
-
-    static resolve(id:string, parent?:Module):ResolveResult {
-        // print(  "resolve", id, parent );
-
-        var roots = findRoots(parent);
-        for ( var i = 0 ; i < roots.length ; ++i ) {
-          var root = Paths.get(roots[i]);
-          var result =
-            resolveCoreModule(id, root)       ||
-            resolveAsFile(id, root, '.js')    ||
-            resolveAsFile(id, root, '.json')  ||
-            resolveAsDirectory(id, root)      ||
-            resolveAsNodeModule(id, root);
-
-            if ( result ) {
-              return result;
-            }
-        }
-      };
-
-
-  constructor(id:string, parent:Module){
-        // print(  "require", id, parent );
-
-        var file = Require.resolve(id, parent);
-
-        if (!file) {
-          if (typeof NativeRequire.require === 'function') {
-            if (Require.debug) {
-              System.out.println(['Cannot resolve', id, 'defaulting to native'].join(' '));
-            }
-            var native = NativeRequire.require(id);
-            if (native) return native;
-          }
-          System.err.println("Cannot find module " + id);
-          throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
-        }
-
-
-        try {
-          // print(  "Require.cache.get", file.path);
-
-          if (Require.cache[file.path]) {
-            return Require.cache[file.path];
-          } else if (String(file.path).endsWith('.js')) {
-            return Module._load(file.path, parent, file.core);
-          } else if (String(file.path).endsWith('.json')) {
-            return loadJSON(file.path, file.core);
-          }
-        } catch(ex) {
-          if (ex instanceof java.lang.Exception) {
-            throw new ModuleError("Cannot load module " + id, "LOAD_ERROR", ex);
-          } else {
-            System.out.println("Cannot load module " + id + " LOAD_ERROR");
-            throw ex;
-          }
-        }
-      }
   }
 
   require = Require;

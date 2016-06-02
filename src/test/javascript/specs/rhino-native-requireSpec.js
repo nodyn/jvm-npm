@@ -1,11 +1,11 @@
 /**
- * 
+ *
  * JASMINE TEST FOR RHINO WITH NATIVE REQUIRE
- * 
+ *
  */
 
 var Paths = java.nio.file.Paths,
-    System = java.lang.System    
+    System = java.lang.System
         ;
 
 var cwd = Paths.get(
@@ -19,7 +19,7 @@ var home = System.getProperty('user.home');
 System.setProperty('user.dir', cwd); // set current dir
 
 
-require.root = cwd;  
+require.root = cwd;
 require.paths = [
     Paths.get(home,".node_modules").toString(),
     Paths.get(home,".node_libraries").toString()
@@ -33,7 +33,7 @@ load('src/main/javascript/jvm-jasmine.js');
 
 describe("NPM global require()", function() {
   require.cache = [];
- 
+
   it("should be a function", function() {
     expect(typeof require).toBe('function');
   });
@@ -50,10 +50,10 @@ describe("NPM global require()", function() {
       expect(ex instanceof ReferenceError).toBeTruthy();
     }
   });
-  
-/* 
+
+/*
   ERROR: missing ; before statement
-    
+
   it("should return the a .json file as a JSON object", function() {
     var json = require('lib/some_data.json');
     expect(json.description).toBe("This is a JSON file");
@@ -62,9 +62,9 @@ describe("NPM global require()", function() {
 */
   it("outer.quadruple is defined ", function() {
     var outer = require('lib/outer');
-    expect(outer.quadruple).toBeDefined();    
+    expect(outer.quadruple).toBeDefined();
   });
-  
+
   it("should support nested requires", function() {
     var outer = require('lib/outer');
     expect(outer.quadruple(2)).toBe(8);
@@ -74,7 +74,7 @@ describe("NPM global require()", function() {
     var outer = require('lib/outer.js');
     expect(outer.quadruple(2)).toBe(8);
   });
-    
+
   it("should cache modules in require.cache", function() {
     var outer = require('lib/outer.js');
     var outer2 = require('lib/outer.js');
@@ -114,10 +114,10 @@ describe("NPM Module execution context", function() {
 
 
 describe("module isolation", function() {
- 
+
     /*
     it("should expose global variables and not expose 'var' declared variables", function() {
-   
+
     var top = require( 'lib/isolation/module-a.js');
     expect(doLeak).toBe("cheddar");
     try {
@@ -155,7 +155,7 @@ describe("cyclic with replacement of module.exports", function() {
 
 describe("Core modules", function() {
   it("should be found on the classpath", function() {
-    var core = require('core');    
+    var core = require('core');
     expect(core).not.toBeFalsy();
   });
 
@@ -171,12 +171,12 @@ describe("Core modules", function() {
 
 describe("The Module module", function() {
   it('should exist', function() {
-    var Module = require('rhino-npm');
+    var Module = require('dist/rhino-npm');
     expect(Module).toBeTruthy();
   });
 
   it('should have a runMain function', function() {
-    var Module = require('rhino-npm');
+    var Module = require('dist/rhino-npm');
     expect(typeof Module.runMain).toBe('function');
   });
 });
@@ -184,6 +184,6 @@ describe("The Module module", function() {
 report();
 
 require.paths.forEach( function(p) {
-   
+
     print( "path", p);
 });

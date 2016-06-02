@@ -1,11 +1,11 @@
 /**
- * 
+ *
  * JASMINE TEST FOR RHINO + RHINO-NPM WITHOUT NATIVE REQUIRE
- * 
+ *
  */
 
 var Paths = java.nio.file.Paths,
-    System = java.lang.System    
+    System = java.lang.System
         ;
 
 var cwd = Paths.get(
@@ -19,9 +19,9 @@ var home = System.getProperty('user.home');
 System.setProperty('user.dir', cwd); // set current dir
 
 // Load the NPM module loader into the global scope
-load('src/main/javascript/rhino-npm.js');
+load('src/main/javascript/dist/jvm-rhino-npm.js');
 
-require.root = cwd;  
+require.root = cwd;
 require.paths = [
     Paths.get(home,".node_modules").toString(),
     Paths.get(home,".node_libraries").toString()
@@ -31,12 +31,12 @@ require.paths = [
 load('src/main/javascript/jvm-jasmine.js');
 
 beforeEach( function() {
-  require.cache = [];    
+  require.cache = [];
 });
 
 describe("NPM global require()", function() {
   require.cache = [];
- 
+
   it("should be a function", function() {
     expect(typeof require).toBe('function');
   });
@@ -79,9 +79,9 @@ describe("NPM global require()", function() {
 
   it("outer.quadruple is defined ", function() {
     var outer = require('lib/outer');
-    expect(outer.quadruple).toBeDefined();    
+    expect(outer.quadruple).toBeDefined();
   });
-  
+
   it("should support nested requires", function() {
     var outer = require('./lib/outer');
     expect(outer.quadruple(2)).toBe(8);
@@ -94,10 +94,10 @@ describe("NPM global require()", function() {
 
   it("outer.filename is defined", function() {
     var outer = require('lib/outer.js');
-    expect(outer.filename).toBeDefined();    
+    expect(outer.filename).toBeDefined();
   });
-  
-  
+
+
   it("should cache modules in require.cache", function() {
     var outer = require('./lib/outer.js');
     expect(outer).toBe(require.cache[outer.filename]);
@@ -190,7 +190,7 @@ describe("cyclic with replacement of module.exports", function() {
 
 describe("Core modules", function() {
   it("should be found on the classpath", function() {
-    var core = require('core');    
+    var core = require('core');
     expect(core).not.toBeFalsy();
   });
 
@@ -206,12 +206,12 @@ describe("Core modules", function() {
 
 describe("The Module module", function() {
   it('should exist', function() {
-    var Module = require('rhino-npm');
+    var Module = require('dist/rhino-npm');
     expect(Module).toBeTruthy();
   });
 
   it('should have a runMain function', function() {
-    var Module = require('jvm-npm');
+    var Module = require('dist/rhino-npm');
     expect(typeof Module.runMain).toBe('function');
   });
 });
@@ -219,6 +219,6 @@ describe("The Module module", function() {
 report();
 
 require.paths.forEach( function(p) {
-   
+
     print( "path", p);
 });

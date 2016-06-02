@@ -25,27 +25,27 @@ import org.junit.Test;
  * @author softphone
  */
 public class DynjsTest {
-    
+
    @Ignore
     @Test
     public void dummy() {
 
-    }    
+    }
 
-    
+
     @Test
     public void dynjs_npm_js_test(){
         Config config = new Config();
         config.setCompileMode(Config.CompileMode.OFF);
         config.setDebug(false);
-        
-        
+
+
         DynJS dynjs = new DynJS(config);
-        
+
         dynjs.evaluate("require.addLoadPath('/')");
         dynjs.evaluate("load('src/main/javascript/jvm-jasmine.js');");
         dynjs.evaluate("load('src/test/javascript/specs/dynjs-npm-requireSpec.js');");
-        
+
         dynjs.evaluate("report();");
 
     }

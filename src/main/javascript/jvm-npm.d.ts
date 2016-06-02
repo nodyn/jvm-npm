@@ -36,8 +36,16 @@ interface FunctionConstructor {
 interface String {
     endsWith(suffix: string): boolean;
 }
+
+interface ResolveResult {
+  path:string;
+  core?:boolean;
+}
+
 declare function print(...args: Object[]): any;
 declare var module: any;
 declare var require: Function;
 declare var NativeRequire: any;
 declare var Require: any;
+
+type Path = java.nio.file.Path;
