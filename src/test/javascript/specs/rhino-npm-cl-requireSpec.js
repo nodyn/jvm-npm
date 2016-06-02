@@ -236,12 +236,12 @@ describe("Path management", function() {
 
 describe("The Module module", function() {
   it('should exist', function() {
-    var Module = require('dist/jvm-npm-cl');
+    var Module = require('jvm-rhino-cl-npm');
     expect(Module).toBeTruthy();
   });
 
   it('should have a runMain function', function() {
-    var Module = require('dist/jvm-npm-cl');
+    var Module = require('jvm-rhino-cl-npm');
     expect(typeof Module.runMain).toBe('function');
   });
 });
