@@ -6,7 +6,7 @@
 
   <groupId>io.nodyn</groupId>
   <artifactId>jvm-npm</artifactId>
-  <version>0.2.0</version>
+  <version>0.2.1-SNAPSHOT</version>
   <url>http://github.com/nodyn/jvm-npm</url>
   <name>jvm-npm</name>
 
@@ -75,11 +75,19 @@
         <version>1.0-beta-7</version>
       </extension>
     </extensions>
+    
     <resources>
       <resource>
         <directory>src/main/typescript/dist</directory>
       </resource>
+      <resource>
+          <directory>src/test/javascript</directory>
+          <includes>
+              <include>jvm-jasmine.js</include>
+          </includes>
+      </resource>
     </resources>
+    
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -94,18 +102,23 @@
             <configuration>
               <artifacts>
                 <artifact>
-                  <file>target/classes/jvm-npm.js</file>
+                  <file>src/main/typescript/dist/jvm-npm.js</file>
                   <type>js</type>
                 </artifact>
                 <artifact>
-                  <file>target/classes/jvm-rhino-cl-npm.js</file>
+                  <file>src/main/typescript/dist/jvm-rhino-cl-npm.js</file>
                   <type>js</type>
                   <classifier>rhino-cl</classifier>
                 </artifact>
                 <artifact>
-                  <file>target/classes/jvm-rhino-npm.js</file>
+                  <file>src/main/typescript/dist/jvm-rhino-npm.js</file>
                   <type>js</type>
                   <classifier>rhino</classifier>
+                </artifact>
+                <artifact>
+                  <file>src/test/javascript/jvm-jasmine.js</file>
+                  <type>js</type>
+                  <classifier>jasmine</classifier>
                 </artifact>
               </artifacts>
             </configuration>
