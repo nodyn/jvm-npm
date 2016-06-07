@@ -4,24 +4,35 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.nodyn</groupId>
+  <groupId>org.bsc</groupId>
   <artifactId>jvm-npm</artifactId>
-  <version>0.2.1</version>
+  <version>1.0.0-SNAPSHOT</version>
   <url>http://github.com/nodyn/jvm-npm</url>
   <name>jvm-npm</name>
 
   <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
-    <version>7</version>
+    <version>9</version>
   </parent>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <version.dynjs>0.3.1</version.dynjs>
+    <release.repo.id>sonatype-server</release.repo.id>
+    <release.repo.url>https://oss.sonatype.org/service/local/staging/deploy/maven2</release.repo.url>
+    <snapshot.repo.id>sonatype-server</snapshot.repo.id>    
+    <snapshot.repo.url>https://oss.sonatype.org/content/repositories/snapshots</snapshot.repo.url>
   </properties>
 
   <developers>
+    <developer>
+      <id>bsorrentino</id>
+      <name>Bartolomeo Sorrentino</name>
+      <url>http://soulsoftware-bsc.blogspot.it/</url>
+      <email>bartolomeo.sorrentino@gmail.com</email>
+    </developer>
+      
     <developer>
       <id>lanceball</id>
       <name>Lance Ball</name>
@@ -30,11 +41,23 @@
     </developer>
   </developers>
 
+    <distributionManagement>
+        <repository>
+            <id>${release.repo.id}</id>
+            <name>central</name>
+            <url>${release.repo.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>${snapshot.repo.id}</id>
+            <name>snapshots</name>
+            <url>${snapshot.repo.url}</url>
+        </snapshotRepository>
+    </distributionManagement>
+
   <scm>
-    <connection>scm:git:git@github.com:nodyn/jvm-npm.git</connection>
-    <developerConnection>scm:git:git@github.com:nodyn/jvm-npm.git</developerConnection>
-    <url>git@github.com:nodyn/jvm-npm.git</url>
-    <tag>HEAD</tag>
+    <connection>scm:git:https://github.com/bsorrentino/jvm-npm</connection>
+    <developerConnection>scm:git:https://github.com/bsorrentino/jvm-npm</developerConnection>
+    <url>https://github.com/bsorrentino/jvm-npm</url>
   </scm>
 
   <licenses>
