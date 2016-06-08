@@ -19,6 +19,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <version.dynjs>0.3.1</version.dynjs>
+    <version.rhino>1.7.7.1</version.rhino>
     <release.repo.id>sonatype-server</release.repo.id>
     <release.repo.url>https://oss.sonatype.org/service/local/staging/deploy/maven2</release.repo.url>
     <snapshot.repo.id>sonatype-server</snapshot.repo.id>    
@@ -72,7 +73,7 @@
     <dependency>
       <groupId>org.mozilla</groupId>
       <artifactId>rhino</artifactId>
-      <version>1.7.7.1</version>
+      <version>${version.rhino}</version>
       <optional>true</optional>
     </dependency>
 
@@ -80,7 +81,7 @@
       <groupId>org.dynjs</groupId>
       <artifactId>dynjs</artifactId>
       <version>${version.dynjs}</version>
-      <scope>test</scope>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
