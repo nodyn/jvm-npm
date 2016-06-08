@@ -35,7 +35,6 @@ beforeEach( function() {
 });
 
 describe("NPM global require()", function() {
-  require.cache = [];
 
   it("should be a function", function() {
     expect(typeof require).toBe('function');
