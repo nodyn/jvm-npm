@@ -85,7 +85,7 @@ module = (typeof module == 'undefined') ? {} :  module;
     static NODE_PATH:string = undefined;
     static paths = [];
     static debug = true;
-    static cache = {};
+    static cache: { [s: string]: any; } = {};
     static extensions = {};
 
     static resolve(id, parent?) {

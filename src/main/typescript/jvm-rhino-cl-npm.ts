@@ -9,7 +9,6 @@
 
 module = (typeof module == 'undefined') ? {} :  module;
 
-
 (function() {
   var System  = java.lang.System,
       Scanner = java.util.Scanner,
@@ -56,12 +55,12 @@ module = (typeof module == 'undefined') ? {} :  module;
      *
      */
     static _load( file, parent:Module, core:boolean, main?:boolean ):any {
-      // print( "_load", file, parent, core, main );
+      if( Require.debug ) print( "module._load", file, parent, core, main );
 
       var module = new Module(file, parent, core);
       var __FILENAME__ = module.filename;
-      var body   = readFile(module.filename, module.core),
-          dir    = new File(module.filename).getParent(),
+      var body   = module.getBody(),
+          dir    = module.getParent(),
           args   = ['exports', 'module', 'require', '__filename', '__dirname'],
           func   = new Function(args, body);
       func.apply(module,
@@ -88,6 +87,16 @@ module = (typeof module == 'undefined') ? {} :  module;
 
       this.exports = {};
     }
+
+    private getBody():string {
+      return readFile(this.filename, this.core);
+    }
+
+    private getParent():string {
+      var path = Paths.get( this.filename);
+
+      return path.getParent() || "";
+    }
   }
 
 
@@ -95,12 +104,12 @@ module = (typeof module == 'undefined') ? {} :  module;
       static root = '';
       static NODE_PATH = undefined;
       static paths:Array<string> = [];
-      static debug = true;
-      static cache:[any];
+      static debug = false;
+      static cache: { [s: string]: any; } = {};
       static extensions = {};
 
       static resolve(id:string, parent?:Module):ResolveResult {
-          // print(  "resolve", id, parent );
+          if( Require.debug ) print( "require.resolve", id, parent );
 
           var roots = findRoots(parent);
           for ( var i = 0 ; i < roots.length ; ++i ) {
@@ -120,7 +129,7 @@ module = (typeof module == 'undefined') ? {} :  module;
 
 
     constructor(id:string, parent:Module){
-          // print(  "require", id, parent );
+          if( Require.debug )  print(  "require", id, parent );
 
           var file = Require.resolve(id, parent);
 
@@ -136,10 +145,8 @@ module = (typeof module == 'undefined') ? {} :  module;
             throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
           }
 
-
           try {
-            // print(  "Require.cache.get", file.path);
-
+            
             if (Require.cache[file.path]) {
               return Require.cache[file.path];
             } else if (String(file.path).endsWith('.js')) {
@@ -159,7 +166,7 @@ module = (typeof module == 'undefined') ? {} :  module;
   }
 
   function resolveCoreModule(id:string, root:Path):ResolveResult {
-      // print(  "resolveCoreModule", id, root);
+      if( Require.debug ) print(  "resolveCoreModule", id, root);
 
       var name = normalizeName(id);
 
@@ -168,6 +175,8 @@ module = (typeof module == 'undefined') ? {} :  module;
     }
 
   function resolveAsNodeModule(id:string, root:Path):ResolveResult {
+    if( Require.debug ) print(  "resolveAsNodeModule", id, root);
+
     var base = Paths.get(root, 'node_modules');
 
     return resolveAsFile(id, base) ||
@@ -176,8 +185,7 @@ module = (typeof module == 'undefined') ? {} :  module;
   }
 
   function resolveAsDirectory(id:string, root?:Path):ResolveResult {
-
-    // print(  "resolveAsDirectory", id, root);
+    if( Require.debug ) print(  "resolveAsDirectory", id, root);
 
     var base = mergePath(id,root),
         file = base.resolve('package.json').toString();
@@ -210,7 +218,7 @@ module = (typeof module == 'undefined') ? {} :  module;
 
     var file = mergePath(id,root).toString();
 
-    // print(  "resolveAsFile", id, root, ext, file);
+    if( Require.debug ) print(  "resolveAsFile", id, root, ext, file);
 
     file = normalizeName(file, ext || '.js');
 
@@ -231,7 +239,7 @@ module = (typeof module == 'undefined') ? {} :  module;
 
     var url = cl.getResource( id );
 
-    // print(  "\tisResourceResolved", url!=null, id );
+    if( Require.debug ) print(  "\tisResourceResolved", url!=null, id );
 
     return url!=null;
   }
@@ -283,7 +291,9 @@ module = (typeof module == 'undefined') ? {} :  module;
   }
 
   function readFile(filename:string, core:boolean) {
-    // print(  '\treadFile', filename, core);
+
+    if( Require.debug ) print(  '\treadFile', filename, core);
+
     var input;
     try {
       if (core) {

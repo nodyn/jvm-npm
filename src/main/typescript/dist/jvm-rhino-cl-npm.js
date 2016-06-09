@@ -40,9 +40,11 @@ module = (typeof module == 'undefined') ? {} : module;
             configurable: true
         });
         Module._load = function (file, parent, core, main) {
+            if (Require.debug)
+                print("module._load", file, parent, core, main);
             var module = new Module(file, parent, core);
             var __FILENAME__ = module.filename;
-            var body = readFile(module.filename, module.core), dir = new File(module.filename).getParent(), args = ['exports', 'module', 'require', '__filename', '__dirname'], func = new Function(args, body);
+            var body = module.getBody(), dir = module.getParent(), args = ['exports', 'module', 'require', '__filename', '__dirname'], func = new Function(args, body);
             func.apply(module, [module.exports, module, module.require, module.filename, dir]);
             module.loaded = true;
             module.main = main;
@@ -52,10 +54,19 @@ module = (typeof module == 'undefined') ? {} : module;
             var file = Require.resolve(main);
             Module._load(file.path, undefined, file.core, true);
         };
+        Module.prototype.getBody = function () {
+            return readFile(this.filename, this.core);
+        };
+        Module.prototype.getParent = function () {
+            var path = Paths.get(this.filename);
+            return path.getParent() || "";
+        };
         return Module;
     }());
     var Require = (function () {
         function Require(id, parent) {
+            if (Require.debug)
+                print("require", id, parent);
             var file = Require.resolve(id, parent);
             if (!file) {
                 if (typeof NativeRequire.require === 'function') {
@@ -91,6 +102,8 @@ module = (typeof module == 'undefined') ? {} : module;
             }
         }
         Require.resolve = function (id, parent) {
+            if (Require.debug)
+                print("require.resolve", id, parent);
             var roots = findRoots(parent);
             for (var i = 0; i < roots.length; ++i) {
                 var root = Paths.get(roots[i]);
@@ -108,22 +121,29 @@ module = (typeof module == 'undefined') ? {} : module;
         Require.root = '';
         Require.NODE_PATH = undefined;
         Require.paths = [];
-        Require.debug = true;
+        Require.debug = false;
+        Require.cache = {};
         Require.extensions = {};
         return Require;
     }());
     function resolveCoreModule(id, root) {
+        if (Require.debug)
+            print("resolveCoreModule", id, root);
         var name = normalizeName(id);
         if (isResourceResolved(name))
             return { path: name, core: true };
     }
     function resolveAsNodeModule(id, root) {
+        if (Require.debug)
+            print("resolveAsNodeModule", id, root);
         var base = Paths.get(root, 'node_modules');
         return resolveAsFile(id, base) ||
             resolveAsDirectory(id, base) ||
             (root ? resolveAsNodeModule(id, root.getParent()) : undefined);
     }
     function resolveAsDirectory(id, root) {
+        if (Require.debug)
+            print("resolveAsDirectory", id, root);
         var base = mergePath(id, root), file = base.resolve('package.json').toString();
         ;
         if (isResourceResolved(file)) {
@@ -142,6 +162,8 @@ module = (typeof module == 'undefined') ? {} : module;
     }
     function resolveAsFile(id, root, ext) {
         var file = mergePath(id, root).toString();
+        if (Require.debug)
+            print("resolveAsFile", id, root, ext, file);
         file = normalizeName(file, ext || '.js');
         if (file.length > 0 && file[0] === '/') {
             if (isResourceResolved(file)) {
@@ -155,6 +177,8 @@ module = (typeof module == 'undefined') ? {} : module;
     function isResourceResolved(id) {
         var cl = Thread.currentThread().getContextClassLoader();
         var url = cl.getResource(id);
+        if (Require.debug)
+            print("\tisResourceResolved", url != null, id);
         return url != null;
     }
     function findRoots(parent) {
@@ -195,6 +219,8 @@ module = (typeof module == 'undefined') ? {} : module;
         return fileName + extension;
     }
     function readFile(filename, core) {
+        if (Require.debug)
+            print('\treadFile', filename, core);
         var input;
         try {
             if (core) {
