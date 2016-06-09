@@ -1,7 +1,6 @@
 package org.jasmine.test;
 
 
-import org.javascript.rhino.RhinoModuleSourceClassLoaderProvider;
 import org.javascript.rhino.RhinoModuleSourceProvider;
 import org.junit.Test;
 import org.mozilla.javascript.Context;
@@ -12,11 +11,9 @@ import static org.javascript.rhino.RhinoTopLevel.loadModule;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.runner.RunWith;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProvider;
 
-@RunWith(MultiThreadedRunner.class)
 public class RhinoTest {
 
     ContextFactory contextFactory;
