@@ -32,6 +32,8 @@ import org.mozilla.javascript.commonjs.module.RequireBuilder;
 import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProvider;
 import org.mozilla.javascript.commonjs.module.provider.StrongCachingModuleScriptProvider;
 import static java.lang.String.format;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -112,7 +114,6 @@ public class RhinoTopLevel extends ImporterTopLevel {
         final ClassLoader cl = Thread.currentThread().getContextClassLoader();
 
         final java.io.InputStream is = cl.getResourceAsStream(module);
-
         if (is != null) {
 
             try {
@@ -126,7 +127,7 @@ public class RhinoTopLevel extends ImporterTopLevel {
 
         } else { // Fallback
 
-            java.io.File file = new java.io.File(module);
+            final java.io.File file = new java.io.File(module);
 
             if (!file.exists()) {
                 throw new RuntimeException(format("module [%s] doesn't exist!", module));
@@ -135,8 +136,7 @@ public class RhinoTopLevel extends ImporterTopLevel {
                 throw new RuntimeException(format("module [%s] is not a file exist!", module));
             }
 
-            try {
-                final java.io.FileReader reader = new java.io.FileReader(file);
+            try( java.io.FileReader reader = new java.io.FileReader(file) ) {
 
                 cx.evaluateReader(this, reader, module, 0, null);
 

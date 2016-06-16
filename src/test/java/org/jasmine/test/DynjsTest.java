@@ -17,6 +17,8 @@ package org.jasmine.test;
 
 import org.dynjs.Config;
 import org.dynjs.runtime.DynJS;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -32,6 +34,21 @@ public class DynjsTest {
 
     }
 
+    String prevUserDir ;
+    
+    @Before
+    public void initFactory() {
+        
+        prevUserDir = System.getProperty("user.dir");
+
+    }
+
+    @After
+    public void releaseFactory() {
+
+        System.setProperty("user.dir", prevUserDir);
+        
+    }
 
     @Test
     public void dynjs_npm_js_test(){

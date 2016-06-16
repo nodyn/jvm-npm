@@ -1,7 +1,9 @@
 package org.jasmine.test;
 
 
-import org.javascript.rhino.Console;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.freedesktop.dbus.test.test;
 import org.javascript.rhino.RhinoModuleSourceClassLoaderProvider;
 import org.junit.Test;
 import org.mozilla.javascript.Context;
@@ -11,11 +13,10 @@ import org.javascript.rhino.RhinoTopLevel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.runner.RunWith;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProvider;
 
-@Ignore
+
 public class RhinoClassLoaderTest {
 
     ContextFactory contextFactory;
@@ -33,8 +34,14 @@ public class RhinoClassLoaderTest {
            }
         };
     
+    
+    String prevUserDir ;
+    
     @Before
     public void initFactory() {
+        
+        prevUserDir = System.getProperty("user.dir");
+        
         contextFactory = new ContextFactory();
     
         contextFactory.addListener( l );
@@ -47,6 +54,8 @@ public class RhinoClassLoaderTest {
         contextFactory.removeListener( l );
         
         contextFactory = null;
+
+         System.setProperty("user.dir", prevUserDir);
     }
     
     @Ignore
@@ -58,6 +67,8 @@ public class RhinoClassLoaderTest {
     
     @Test
     public void rhino_npm_js_cl_test(){
+        
+
         final ModuleSourceProvider sourceProvider = new RhinoModuleSourceClassLoaderProvider();
 
         contextFactory.call( new ContextAction() {

@@ -14,6 +14,7 @@ import org.junit.Ignore;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProvider;
 
+//@org.junit.runner.RunWith(MultiThreadedRunner.class)
 public class RhinoTest {
 
     ContextFactory contextFactory;
@@ -31,8 +32,13 @@ public class RhinoTest {
            }
         };
 
+    String prevUserDir ;
+    
     @Before
     public void initFactory() {
+        
+        prevUserDir = System.getProperty("user.dir");
+        
         contextFactory = new ContextFactory();
 
         contextFactory.addListener( l );
@@ -43,8 +49,11 @@ public class RhinoTest {
     public void releaseFactory() {
 
         contextFactory.removeListener( l );
-
+        
         contextFactory = null;
+        
+        System.setProperty("user.dir", prevUserDir);
+        
     }
 
     @Ignore
@@ -117,6 +126,19 @@ public class RhinoTest {
         });
 
 
+    }
+    
+    public static void main( String args[] ) throws Exception {
+        RhinoTest test = new RhinoTest();
+        
+        test.initFactory();
+        
+        try {
+            test.rhino_npm_only_js_test();
+        }
+        finally {
+            test.releaseFactory();
+        }
     }
 
 }
