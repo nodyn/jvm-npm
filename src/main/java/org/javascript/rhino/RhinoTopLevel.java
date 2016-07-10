@@ -15,15 +15,14 @@
  */
 package org.javascript.rhino;
 
+import com.google.common.util.concurrent.Futures;
 import java.io.IOException;
+import java.io.PrintWriter;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ImporterTopLevel;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import static org.mozilla.javascript.ScriptableObject.DONTENUM;
-import static java.lang.String.format;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.commonjs.module.ModuleScriptProvider;
@@ -32,14 +31,12 @@ import org.mozilla.javascript.commonjs.module.RequireBuilder;
 import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProvider;
 import org.mozilla.javascript.commonjs.module.provider.StrongCachingModuleScriptProvider;
 import static java.lang.String.format;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author softphone
  */
-public class RhinoTopLevel extends ImporterTopLevel {
+public class RhinoTopLevel extends AbstractRhinoTopLevel {
 
 
     /**
@@ -51,103 +48,29 @@ public class RhinoTopLevel extends ImporterTopLevel {
      * @param funObj
      */
     public static void print(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
-        if (args == null) {
-            return;
-        }
-
-        int row = 0;
-        for (Object arg : args) {
-
-            if (row++ > 0) {
-                System.out.print(" ");
-            }
-            // Convert the arbitrary JavaScript value into a string form.
-            System.out.print(Context.toString(arg));
-        }
-
-        System.out.println();
+        
+        final RhinoTopLevel _this = deref(thisObj);
+        
+        final PrintWriter w = new PrintWriter(System.out);
+        
+        _this._print( w, cx, args, funObj );
     }
 
     /**
-     * Load and execute a set of JavaScript source files.
-     *
-     * This method is defined as a JavaScript function.
-     *
+     * 
+     * @param cx
+     * @param thisObj
+     * @param args
+     * @param funObj
+     * @throws Exception 
      */
     public static void load(Context cx, Scriptable thisObj, Object[] args, Function funObj) throws Exception {
-        if (args == null) {
-            return;
-        }
-
-        RhinoTopLevel _this = null;
-
-        if( thisObj instanceof RhinoTopLevel ) {
-            _this = (RhinoTopLevel) thisObj;
-        }
-        else {
-
-            final Scriptable protoObj = thisObj.getPrototype();
-            if( protoObj instanceof RhinoTopLevel ) {
-                _this = (RhinoTopLevel) protoObj;
-            }
-            else {
-                throw new IllegalStateException( "cannot deref thisObj to  RhinoTopLevel!");
-            }
-        }
-
-        for (Object a : args) {
-
-            final String module = Context.toString(a);
-
-            _this._load(cx, module);
-        }
+        
+        final RhinoTopLevel _this = deref(thisObj);
+        
+        _this._load(cx, args, funObj );
     }
 
-    private final java.util.Set<String> moduleCache = new java.util.HashSet<>();
-
-    private void _load(Context cx, String module) {
-
-        if( moduleCache.contains(module)) {
-            return;
-        }
-
-        final ClassLoader cl = Thread.currentThread().getContextClassLoader();
-
-        final java.io.InputStream is = cl.getResourceAsStream(module);
-        if (is != null) {
-
-            try {
-                cx.evaluateReader(this, new java.io.InputStreamReader(is), module, 0, null);
-
-                moduleCache.add( module );
-
-            } catch (IOException e) {
-                throw new RuntimeException(format("error evaluating module [%s]", module), e);
-            }
-
-        } else { // Fallback
-
-            final java.io.File file = new java.io.File(module);
-
-            if (!file.exists()) {
-                throw new RuntimeException(format("module [%s] doesn't exist!", module));
-            }
-            if (!file.isFile()) {
-                throw new RuntimeException(format("module [%s] is not a file exist!", module));
-            }
-
-            try( java.io.FileReader reader = new java.io.FileReader(file) ) {
-
-                cx.evaluateReader(this, reader, module, 0, null);
-
-                moduleCache.add( module );
-
-            } catch (IOException e) {
-                throw new RuntimeException(format("error evaluating module [%s]", module), e);
-            }
-
-        }
-    }
 
     /**
      *
@@ -196,7 +119,7 @@ public class RhinoTopLevel extends ImporterTopLevel {
         require.install(scope);
 
     }
-
+/*
     @Override
     public void initStandardObjects(Context cx, boolean sealed) {
         super.initStandardObjects(cx, sealed);
@@ -208,5 +131,5 @@ public class RhinoTopLevel extends ImporterTopLevel {
         objProto.defineFunctionProperties(names, getClass(), DONTENUM);
 
     }
-
+*/
 }
