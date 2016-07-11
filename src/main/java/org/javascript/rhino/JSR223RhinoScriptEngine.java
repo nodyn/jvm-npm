@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import javax.script.Bindings;
 import javax.script.Invocable;
@@ -108,7 +109,7 @@ public class JSR223RhinoScriptEngine extends javax.script.AbstractScriptEngine i
     }
 
     @SuppressWarnings("unchecked")
-    public static final <T> T callInContext(ContextFactory factory, java.util.function.Function<Context, T> f) {
+    public static final <T> T callInContext(ContextFactory factory, Function<Context, T> f) {
 
         return (T) factory.call((Context cx) -> {
             return f.apply(cx);
@@ -116,7 +117,7 @@ public class JSR223RhinoScriptEngine extends javax.script.AbstractScriptEngine i
 
     }
 
-    public final <T> T callInContext(java.util.function.Function<Context, T> f) {
+    public final <T> T callInContext(Function<Context, T> f) {
 
         return callInContext(contextFactory, f);
 
