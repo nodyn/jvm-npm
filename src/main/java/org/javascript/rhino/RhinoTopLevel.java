@@ -15,14 +15,10 @@
  */
 package org.javascript.rhino;
 
-import com.google.common.util.concurrent.Futures;
 import java.io.IOException;
 import java.io.PrintWriter;
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ImporterTopLevel;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
-import static org.mozilla.javascript.ScriptableObject.DONTENUM;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Script;
 import org.mozilla.javascript.commonjs.module.ModuleScriptProvider;

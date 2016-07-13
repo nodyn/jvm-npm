@@ -119,7 +119,7 @@ public class JSR223RhinoScriptEngineFactory implements ScriptEngineFactory {
     @Override
     public ScriptEngine getScriptEngine() {
 
-        final ClassLoader cl = null;
+        final ClassLoader cl = Thread.currentThread().getContextClassLoader();
         final JSR223RhinoScriptEngine service = new JSR223RhinoScriptEngine(cl, (cx, engine) -> {
 
             final boolean sealed = false;

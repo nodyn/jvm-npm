@@ -83,6 +83,7 @@ public abstract class AbstractRhinoTopLevel extends ImporterTopLevel {
         }
 
         out.println();
+        out.flush();
     }
     
     private final java.util.Set<String> moduleCache = new java.util.HashSet<>();

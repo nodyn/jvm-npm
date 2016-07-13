@@ -26,12 +26,13 @@ public final class JSR223RhinoTopLevel extends AbstractRhinoTopLevel {
         
         final JSR223RhinoTopLevel _this = deref(thisObj);
         
-        final ScriptContext scx = (_this.engine != null ) ? _this.engine.getContext() : null;
-        final java.io.PrintWriter w = ( scx != null ) ? 
-                new java.io.PrintWriter( scx.getWriter() ) :
+        final java.io.Writer w = (_this.engine != null  && _this.engine.getContext() != null ) ? _this.engine.getContext().getWriter() : null;
+        
+        final java.io.PrintWriter writer = ( w != null ) ? 
+                new java.io.PrintWriter( w ) :
                 new java.io.PrintWriter( System.out );
 
-        _this._print(w, cx, args, funObj );
+        _this._print(writer, cx, args, funObj );
     }
     
     /**
