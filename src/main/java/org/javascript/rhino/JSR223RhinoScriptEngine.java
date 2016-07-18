@@ -148,6 +148,11 @@ public class JSR223RhinoScriptEngine extends javax.script.AbstractScriptEngine i
 
     }
 
+    private ScriptableObject topLevelProto() {
+        return (ScriptableObject) ScriptableObject.getObjectPrototype(topLevel);
+        //return topLevel;
+    }
+    
     private void putBean(final String name, final Object bean) {
         if (bean == null) {
             return;
@@ -155,7 +160,7 @@ public class JSR223RhinoScriptEngine extends javax.script.AbstractScriptEngine i
 
         callInContext((ctx) -> {
 
-            final ScriptableObject objProto = (ScriptableObject) ScriptableObject.getObjectPrototype(topLevel);
+            final ScriptableObject objProto = topLevelProto();
 
             if (bean instanceof Scriptable) {
                 ScriptableObject.putProperty(objProto, name, bean);
@@ -284,7 +289,7 @@ public class JSR223RhinoScriptEngine extends javax.script.AbstractScriptEngine i
 
             Scriptable parentScope = func.getParentScope();
             if (parentScope == null) {
-                parentScope = topLevel;
+                parentScope = topLevelProto();
             }
 
             Object result = func.call(cx, parentScope, localScope, wrapArguments(args));
@@ -318,7 +323,7 @@ public class JSR223RhinoScriptEngine extends javax.script.AbstractScriptEngine i
 
                 Scriptable parentScope = func.getParentScope();
                 if (parentScope == null) {
-                    parentScope = topLevel;
+                    parentScope = topLevelProto();
                 }
 
                 Object result = func.call(cx, parentScope, localScope, wrapArguments(args));
