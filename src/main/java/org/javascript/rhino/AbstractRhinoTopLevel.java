@@ -18,6 +18,8 @@ package org.javascript.rhino;
 import java.io.IOException;
 import java.io.PrintWriter;
 import static java.lang.String.format;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.ImporterTopLevel;
@@ -88,6 +90,20 @@ public abstract class AbstractRhinoTopLevel extends ImporterTopLevel {
     
     private final java.util.Set<String> moduleCache = new java.util.HashSet<>();
 
+    
+    private Path normalizeModuleName( String moduleName ) {
+
+        Path modulePath = Paths.get( moduleName );
+        
+        if( modulePath.startsWith("classpath:") ) {
+            
+            return modulePath.subpath(1,modulePath.getNameCount());
+        }
+        
+        return modulePath;
+        
+        
+    }
     /**
      * 
      * @param cx
@@ -100,7 +116,7 @@ public abstract class AbstractRhinoTopLevel extends ImporterTopLevel {
 
         for( Object arg :  args ) {
             
-            final String module = Context.toString(arg);
+            final String module = normalizeModuleName(Context.toString(arg)).toString();
 
             if( moduleCache.contains(module)) {
                 break;

@@ -149,7 +149,8 @@ function expect( condition ) {
             return _toBeNull();
         },
         toBe:function(c) {
-            if( c == condition ) return;
+            if( c == condition || c === condition ) return;
+            if( typeof c == 'string' && c == java.lang.String.valueOf(condition))  return;
 
             var msg =  "expect ["+ c + "] but is ["+condition+"]" ;
             throw new Error(msg);

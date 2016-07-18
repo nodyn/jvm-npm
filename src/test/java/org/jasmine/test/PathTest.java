@@ -15,6 +15,7 @@
  */
 package org.jasmine.test;
 
+import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.hamcrest.core.Is;
@@ -93,4 +94,15 @@ public class PathTest {
         Assert.assertThat( p[0].resolve("package.json"), IsEqual.equalTo(p[1]));
     } 
     
+    @Test
+    public void classpath() {
+
+        final Path p = Paths.get("classpath://scripting/jvm-rhino-cl-npm.js");
+        
+        
+        Assert.assertThat(p.startsWith("classpath:"), Is.is(true));  
+
+        Assert.assertThat(p.subpath(1,p.getNameCount()).toString(), IsEqual.equalTo("scripting/jvm-rhino-cl-npm.js"));          
+        
+    }
 }
