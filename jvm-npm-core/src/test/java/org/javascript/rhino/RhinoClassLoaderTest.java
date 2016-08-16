@@ -1,4 +1,4 @@
-package org.jasmine.test;
+package org.javascript.rhino;
 
 
 import java.nio.file.Path;
@@ -8,7 +8,6 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import org.freedesktop.dbus.test.test;
 import org.hamcrest.core.IsNull;
-import org.javascript.rhino.RhinoModuleSourceClassLoaderProvider;
 import org.junit.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;

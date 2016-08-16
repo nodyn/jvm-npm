@@ -1,11 +1,10 @@
-package org.jasmine.test;
+package org.javascript.rhino;
 
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import org.hamcrest.core.IsNull;
-import org.javascript.rhino.RhinoModuleSourceProvider;
 import org.junit.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
