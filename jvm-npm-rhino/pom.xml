@@ -6,12 +6,20 @@
     <version>1.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>jvm-npm-rhino</artifactId>
+  <name>JVM-NPM::Rhino</name>
 
   <properties>
     <version.rhino>1.7.7.1</version.rhino>
   </properties>
   
 <dependencies>
+
+    <dependency>
+       <groupId>org.kohsuke.metainf-services</groupId>
+       <artifactId>metainf-services</artifactId>
+       <version>1.7</version>
+       <optional>true</optional>
+    </dependency>
 
     <dependency>
       <groupId>org.mozilla</groupId>
@@ -21,5 +29,5 @@
     </dependency>
 
 </dependencies>  
-	<name>JVM-NPM::Rhino</name>
+
 </project>

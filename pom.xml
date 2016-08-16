@@ -18,8 +18,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.dynjs>0.3.1</version.dynjs>
-    <version.rhino>1.7.7.1</version.rhino>
     <release.repo.id>sonatype-server</release.repo.id>
     <release.repo.url>https://oss.sonatype.org/service/local/staging/deploy/maven2</release.repo.url>
     <snapshot.repo.id>sonatype-server</snapshot.repo.id>
@@ -72,91 +70,28 @@
   <dependencies>
 
     <dependency>
-      <groupId>org.dynjs</groupId>
-      <artifactId>dynjs</artifactId>
-      <version>${version.dynjs}</version>
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.12</version>
     </dependency>
 
-    <dependency>
-       <groupId>org.kohsuke.metainf-services</groupId>
-       <artifactId>metainf-services</artifactId>
-       <version>1.7</version>
-       <optional>true</optional>
-    </dependency>
-  </dependencies>
-
+</dependencies>
 
   <build>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-webdav-jackrabbit</artifactId>
-        <version>1.0-beta-7</version>
-      </extension>
-    </extensions>
 
-    <resources>
-      <resource>
-        <directory>src/main/typescript/dist</directory>
-      </resource>
-      <resource>
-          <directory>src/test/javascript</directory>
-          <includes>
-              <include>jvm-jasmine.js</include>
-          </includes>
-      </resource>
-    </resources>
+<pluginManagement>
+<plugins>
+	<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-surefire-plugin</artifactId>
+		<version>2.19.1</version>
+	</plugin>
 
-    <plugins>
-      <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-surefire-plugin</artifactId>
-       <version>2.19.1</version>
-     </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.10</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>src/main/typescript/dist/jvm-npm.js</file>
-                  <type>js</type>
-                </artifact>
-                <artifact>
-                  <file>src/main/typescript/dist/jvm-rhino-cl-npm.js</file>
-                  <type>js</type>
-                  <classifier>rhino-cl</classifier>
-                </artifact>
-                <artifact>
-                  <file>src/main/typescript/dist/jvm-rhino-npm.js</file>
-                  <type>js</type>
-                  <classifier>rhino</classifier>
-                </artifact>
-                <artifact>
-                  <file>src/test/javascript/jvm-jasmine.js</file>
-                  <type>js</type>
-                  <classifier>jasmine</classifier>
-                </artifact>
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+	<plugin>
+		<groupId>org.codehaus.mojo</groupId>
+		<artifactId>build-helper-maven-plugin</artifactId>
+		<version>1.10</version>
+	</plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -187,7 +122,9 @@
           </execution>
         </executions>
       </plugin>
-    </plugins>
+</plugins>	
+</pluginManagement>
+
   </build>
   <packaging>pom</packaging>
   <modules>

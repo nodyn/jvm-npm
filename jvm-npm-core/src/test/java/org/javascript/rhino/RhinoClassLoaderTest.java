@@ -3,25 +3,28 @@ package org.javascript.rhino;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import org.freedesktop.dbus.test.test;
+
 import org.hamcrest.core.IsNull;
-import org.junit.Test;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextAction;
-import org.mozilla.javascript.ContextFactory;
-import org.javascript.rhino.RhinoTopLevel;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Test;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ContextAction;
+import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProvider;
-
+import static java.lang.String.format;
 
 public class RhinoClassLoaderTest {
+	final String javascriptDir = Paths.get("src", "test", "javascript").toString();
+    
+	final Path npmCLRequireSpecs	= Paths.get( javascriptDir,	"specs", "rhino-npm-cl-requireSpec.js");
 
     ContextFactory contextFactory;
 
@@ -87,7 +90,7 @@ public class RhinoClassLoaderTest {
                 //newScope.setParentScope(null);
                 
                 //RhinoTopLevel.installNativeRequire(cx, newScope, topLevel, sourceProvider);
-                RhinoTopLevel.loadModule(cx, newScope, "src/test/javascript/specs/rhino-npm-cl-requireSpec.js");
+                RhinoTopLevel.loadModule(cx, newScope, npmCLRequireSpecs);
                 
                 return newScope;
            }
@@ -102,7 +105,7 @@ public class RhinoClassLoaderTest {
 
         Assert.assertThat(rhino , IsNull.notNullValue());
         
-        rhino.eval( "load('src/test/javascript/specs/rhino-npm-cl-requireSpec.js');" );
+        rhino.eval( format("load('%s');", npmCLRequireSpecs) );
 
         
     }

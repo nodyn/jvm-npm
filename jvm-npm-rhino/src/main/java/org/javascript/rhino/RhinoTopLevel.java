@@ -15,18 +15,21 @@
  */
 package org.javascript.rhino;
 
+import static java.lang.String.format;
+
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Path;
+
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Script;
+import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.commonjs.module.ModuleScriptProvider;
 import org.mozilla.javascript.commonjs.module.Require;
 import org.mozilla.javascript.commonjs.module.RequireBuilder;
 import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProvider;
 import org.mozilla.javascript.commonjs.module.provider.StrongCachingModuleScriptProvider;
-import static java.lang.String.format;
 
 /**
  *
@@ -87,13 +90,13 @@ public class RhinoTopLevel extends AbstractRhinoTopLevel {
 
     }
 
-    public static void loadModule(Context cx, Scriptable scope, String moduleName) {
+    public static void loadModule(Context cx, Scriptable scope, Path modulePath) {
 
-        try (java.io.FileReader module = new java.io.FileReader( moduleName ) ) {
+        try (java.io.FileReader module = new java.io.FileReader( modulePath.toFile() ) ) {
 
-            cx.evaluateReader(scope, module, moduleName, 0, null);
+            cx.evaluateReader(scope, module, modulePath.toString(), 0, null);
         } catch (IOException e) {
-            throw new RuntimeException(format("error evaluating [%s]!", moduleName), e);
+            throw new RuntimeException(format("error evaluating [%s]!", modulePath.toString()), e);
         }
     }
 
