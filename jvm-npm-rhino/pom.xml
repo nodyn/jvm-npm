@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.bsc</groupId>
     <artifactId>jvm-npm</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.3.0</version>
   </parent>
   <artifactId>jvm-npm-rhino</artifactId>
   <name>JVM-NPM::Rhino</name>
