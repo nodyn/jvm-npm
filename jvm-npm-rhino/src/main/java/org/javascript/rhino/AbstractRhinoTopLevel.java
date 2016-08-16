@@ -15,32 +15,35 @@
  */
 package org.javascript.rhino;
 
+import static java.lang.String.format;
+
 import java.io.IOException;
 import java.io.PrintWriter;
-import static java.lang.String.format;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.ImporterTopLevel;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
-import static org.mozilla.javascript.ScriptableObject.DONTENUM;
-import static org.mozilla.javascript.ScriptableObject.getObjectPrototype;
 
 /**
  *
  * @author softphone
  */
+@SuppressWarnings("serial")
 public abstract class AbstractRhinoTopLevel extends ImporterTopLevel {
 
-    /**
+    private static final String CLASSPATH_PREFIX = "classpath:";
+
+
+	/**
      * 
      * @param <T>
      * @param thisObj
      * @return 
      */
-    protected static <T extends AbstractRhinoTopLevel> T deref(Scriptable thisObj) {
+    @SuppressWarnings("unchecked")
+	protected static <T extends AbstractRhinoTopLevel> T deref(Scriptable thisObj) {
         AbstractRhinoTopLevel _this = null;
 
         if( thisObj instanceof AbstractRhinoTopLevel ) {
@@ -91,16 +94,14 @@ public abstract class AbstractRhinoTopLevel extends ImporterTopLevel {
     private final java.util.Set<String> moduleCache = new java.util.HashSet<>();
 
     
-    private Path normalizeModuleName( String moduleName ) {
+    private String normalizeModuleName( String moduleName ) {
 
-        Path modulePath = Paths.get( moduleName );
-        
-        if( modulePath.startsWith("classpath:") ) {
+        if( moduleName.startsWith(CLASSPATH_PREFIX) ) {
             
-            return modulePath.subpath(1,modulePath.getNameCount());
+            return moduleName.substring(CLASSPATH_PREFIX.length());
         }
         
-        return modulePath;
+        return moduleName;
         
         
     }
@@ -116,7 +117,7 @@ public abstract class AbstractRhinoTopLevel extends ImporterTopLevel {
 
         for( Object arg :  args ) {
             
-            final String module = normalizeModuleName(Context.toString(arg)).toString();
+            final String module = normalizeModuleName(Context.toString(arg));
 
             if( moduleCache.contains(module)) {
                 break;

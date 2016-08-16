@@ -15,9 +15,9 @@
  */
 package org.jasmine.test;
 
-import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNull;

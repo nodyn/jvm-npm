@@ -35,6 +35,7 @@ import org.mozilla.javascript.commonjs.module.provider.StrongCachingModuleScript
  *
  * @author softphone
  */
+@SuppressWarnings("serial")
 public class RhinoTopLevel extends AbstractRhinoTopLevel {
 
 

@@ -1,13 +1,11 @@
 package org.javascript.rhino;
 
 
-import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 
 @SuppressWarnings("serial")
 public final class JSR223RhinoTopLevel extends AbstractRhinoTopLevel {
