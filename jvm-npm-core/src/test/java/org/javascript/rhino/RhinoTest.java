@@ -1,27 +1,39 @@
-package org.jasmine.test;
+package org.javascript.rhino;
 
+
+import static org.javascript.rhino.RhinoTopLevel.loadModule;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+
 import org.hamcrest.core.IsNull;
-import org.javascript.rhino.RhinoModuleSourceProvider;
-import org.junit.Test;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextAction;
-import org.mozilla.javascript.ContextFactory;
-import org.javascript.rhino.RhinoTopLevel;
-import static org.javascript.rhino.RhinoTopLevel.loadModule;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Test;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ContextAction;
+import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProvider;
+
+import static java.lang.String.format;
 
 //@org.junit.runner.RunWith(MultiThreadedRunner.class)
 public class RhinoTest {
 
+	final String javascriptDir = Paths.get("src","test","javascript").toString();
+    
+	final Path jasmine					= Paths.get( javascriptDir, "jvm-jasmine.js");  
+    final Path npmRequireSpecs			= Paths.get( javascriptDir,	"specs", "rhino-npm-requireSpec.js");
+	final Path nativeRequireSpecs		= Paths.get( javascriptDir,	"specs", "rhino-native-requireSpec.js");
+	final Path npmNativeRequireSpecs	= Paths.get( javascriptDir,	"specs", "rhino-npm-native-requireSpec.js");
+	
     ContextFactory contextFactory;
 
     final ContextFactory.Listener l = new ContextFactory.Listener() {
@@ -41,7 +53,7 @@ public class RhinoTest {
     
     @Before
     public void initFactory() {
-        
+    	
         prevUserDir = System.getProperty("user.dir");
         
         contextFactory = new ContextFactory();
@@ -81,7 +93,7 @@ public class RhinoTest {
                 //newScope.setParentScope(null);
 
                 RhinoTopLevel.installNativeRequire(cx, newScope, topLevel,sourceProvider);
-                RhinoTopLevel.loadModule(cx, newScope, "src/test/javascript/specs/rhino-npm-native-requireSpec.js");
+                RhinoTopLevel.loadModule(cx, newScope, npmNativeRequireSpecs );
 
                 return newScope;
            }
@@ -104,7 +116,7 @@ public class RhinoTest {
                 //newScope.setParentScope(null);
 
                 RhinoTopLevel.installNativeRequire(cx, newScope, topLevel, sourceProvider);
-                loadModule(cx, newScope, "src/test/javascript/specs/rhino-native-requireSpec.js");
+                loadModule(cx, newScope, nativeRequireSpecs);
 
                 return newScope;
            }
@@ -124,7 +136,7 @@ public class RhinoTest {
                 newScope.setPrototype(topLevel);
                 //newScope.setParentScope(null);
 
-                loadModule(cx, newScope, "src/test/javascript/specs/rhino-npm-requireSpec.js");
+                loadModule(cx, newScope, npmRequireSpecs);
 
                 return newScope;
            }
@@ -141,8 +153,8 @@ public class RhinoTest {
         Assert.assertThat(rhino , IsNull.notNullValue());
         
         rhino.eval( new StringBuilder()
-                        .append("load('src/test/javascript/jvm-jasmine.js');").append('\n')
-                        .append("load('src/test/javascript/specs/rhino-npm-requireSpec.js');").append('\n')
+                        .append("load('").append(jasmine).append("');\n")
+                        .append("load('").append(npmRequireSpecs).append("');\n")
                         .toString());
 
         

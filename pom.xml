@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.bsc</groupId>
   <artifactId>jvm-npm</artifactId>
   <version>1.0.0-SNAPSHOT</version>
-  <url>http://github.com/nodyn/jvm-npm</url>
+  <url>http://github.com/bsorrentino/jvm-npm</url>
   <name>JVM-NPM</name>
 
   <parent>
@@ -18,8 +17,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.dynjs>0.3.1</version.dynjs>
-    <version.rhino>1.7.7.1</version.rhino>
     <release.repo.id>sonatype-server</release.repo.id>
     <release.repo.url>https://oss.sonatype.org/service/local/staging/deploy/maven2</release.repo.url>
     <snapshot.repo.id>sonatype-server</snapshot.repo.id>
@@ -70,19 +67,6 @@
   </licenses>
 
   <dependencies>
-    <dependency>
-      <groupId>org.mozilla</groupId>
-      <artifactId>rhino</artifactId>
-      <version>${version.rhino}</version>
-      <optional>false</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>org.dynjs</groupId>
-      <artifactId>dynjs</artifactId>
-      <version>${version.dynjs}</version>
-      <optional>true</optional>
-    </dependency>
 
     <dependency>
       <groupId>junit</groupId>
@@ -90,79 +74,23 @@
       <version>4.12</version>
     </dependency>
 
-    <dependency>
-       <groupId>org.kohsuke.metainf-services</groupId>
-       <artifactId>metainf-services</artifactId>
-       <version>1.7</version>
-       <optional>true</optional>
-    </dependency>
-  </dependencies>
-
+</dependencies>
 
   <build>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-webdav-jackrabbit</artifactId>
-        <version>1.0-beta-7</version>
-      </extension>
-    </extensions>
 
-    <resources>
-      <resource>
-        <directory>src/main/typescript/dist</directory>
-      </resource>
-      <resource>
-          <directory>src/test/javascript</directory>
-          <includes>
-              <include>jvm-jasmine.js</include>
-          </includes>
-      </resource>
-    </resources>
+<pluginManagement>
+<plugins>
+	<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-surefire-plugin</artifactId>
+		<version>2.19.1</version>
+	</plugin>
 
-    <plugins>
-      <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-surefire-plugin</artifactId>
-       <version>2.19.1</version>
-     </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.10</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>src/main/typescript/dist/jvm-npm.js</file>
-                  <type>js</type>
-                </artifact>
-                <artifact>
-                  <file>src/main/typescript/dist/jvm-rhino-cl-npm.js</file>
-                  <type>js</type>
-                  <classifier>rhino-cl</classifier>
-                </artifact>
-                <artifact>
-                  <file>src/main/typescript/dist/jvm-rhino-npm.js</file>
-                  <type>js</type>
-                  <classifier>rhino</classifier>
-                </artifact>
-                <artifact>
-                  <file>src/test/javascript/jvm-jasmine.js</file>
-                  <type>js</type>
-                  <classifier>jasmine</classifier>
-                </artifact>
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+	<plugin>
+		<groupId>org.codehaus.mojo</groupId>
+		<artifactId>build-helper-maven-plugin</artifactId>
+		<version>1.10</version>
+	</plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -193,6 +121,13 @@
           </execution>
         </executions>
       </plugin>
-    </plugins>
+</plugins>	
+</pluginManagement>
+
   </build>
+  <packaging>pom</packaging>
+  <modules>
+  	<module>jvm-npm-rhino</module>
+  	<module>jvm-npm-core</module>
+  </modules>
 </project>

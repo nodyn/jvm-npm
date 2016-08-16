@@ -31,6 +31,7 @@ import org.mozilla.javascript.ScriptableObject;
  *
  * @author softphone
  */
+@SuppressWarnings("serial")
 public class RhinoModuleSourceProvider extends ModuleSourceProviderBase {
 
     private long getLength(final Scriptable paths) {

@@ -1,0 +1,33 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.bsc</groupId>
+    <artifactId>jvm-npm</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>jvm-npm-rhino</artifactId>
+  <name>JVM-NPM::Rhino</name>
+
+  <properties>
+    <version.rhino>1.7.7.1</version.rhino>
+  </properties>
+  
+<dependencies>
+
+    <dependency>
+       <groupId>org.kohsuke.metainf-services</groupId>
+       <artifactId>metainf-services</artifactId>
+       <version>1.7</version>
+       <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mozilla</groupId>
+      <artifactId>rhino</artifactId>
+      <version>${version.rhino}</version>
+      <optional>false</optional>
+    </dependency>
+
+</dependencies>  
+
+</project>

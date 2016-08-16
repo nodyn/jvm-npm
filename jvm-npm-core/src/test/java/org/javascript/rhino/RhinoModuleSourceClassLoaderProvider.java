@@ -15,22 +15,23 @@
  */
 package org.javascript.rhino;
 
+import static org.javascript.rhino.Console.log;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import org.mozilla.javascript.commonjs.module.provider.ModuleSource;
-import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProviderBase;
-import static org.javascript.rhino.Console.*;
+
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.commonjs.module.provider.ModuleSource;
+import org.mozilla.javascript.commonjs.module.provider.ModuleSourceProviderBase;
 
 /**
  *
  * @author softphone
  */
+@SuppressWarnings("serial")
 public class RhinoModuleSourceClassLoaderProvider extends ModuleSourceProviderBase {
 
     private long getLength(final Scriptable paths) {
