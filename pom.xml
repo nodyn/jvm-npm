@@ -5,7 +5,7 @@
 
   <groupId>org.bsc</groupId>
   <artifactId>jvm-npm</artifactId>
-  <version>0.3.0</version>
+  <version>0.3.1-SNAPSHOT</version>
   <url>http://github.com/bsorrentino/jvm-npm</url>
   <name>JVM-NPM</name>
 
