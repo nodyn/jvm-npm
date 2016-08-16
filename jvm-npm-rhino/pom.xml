@@ -30,4 +30,36 @@
 
 </dependencies>  
 
+<profiles>
+
+	<profile>
+		<id>jdk7</id>
+		<build>
+
+			<plugins>
+				<plugin>
+					<groupId>net.orfjackal.retrolambda</groupId>
+					<artifactId>retrolambda-maven-plugin</artifactId>
+					<version>2.3.0</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>process-main</goal>
+								<goal>process-test</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.0.2</version>
+					<configuration>
+						<classifier>jdk7</classifier>
+					</configuration>
+				</plugin>
+
+			</plugins>
+		</build>
+	</profile>
+</profiles>
 </project>
