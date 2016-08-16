@@ -1,27 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.nodyn</groupId>
+  <groupId>org.bsc</groupId>
   <artifactId>jvm-npm</artifactId>
-  <version>0.2.1</version>
-  <url>http://github.com/nodyn/jvm-npm</url>
-  <name>jvm-npm</name>
+  <version>0.3.0</version>
+  <url>http://github.com/bsorrentino/jvm-npm</url>
+  <name>JVM-NPM</name>
 
   <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
-    <version>7</version>
+    <version>9</version>
   </parent>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <version.dynjs>0.3.1</version.dynjs>
+    <release.repo.id>sonatype-server</release.repo.id>
+    <release.repo.url>https://oss.sonatype.org/service/local/staging/deploy/maven2</release.repo.url>
+    <snapshot.repo.id>sonatype-server</snapshot.repo.id>
+    <snapshot.repo.url>https://oss.sonatype.org/content/repositories/snapshots</snapshot.repo.url>
   </properties>
 
   <developers>
+    <developer>
+      <id>bsorrentino</id>
+      <name>Bartolomeo Sorrentino</name>
+      <url>http://soulsoftware-bsc.blogspot.it/</url>
+      <email>bartolomeo.sorrentino@gmail.com</email>
+    </developer>
+
     <developer>
       <id>lanceball</id>
       <name>Lance Ball</name>
@@ -30,11 +39,23 @@
     </developer>
   </developers>
 
+    <distributionManagement>
+        <repository>
+            <id>${release.repo.id}</id>
+            <name>central</name>
+            <url>${release.repo.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>${snapshot.repo.id}</id>
+            <name>snapshots</name>
+            <url>${snapshot.repo.url}</url>
+        </snapshotRepository>
+    </distributionManagement>
+
   <scm>
-    <connection>scm:git:git@github.com:nodyn/jvm-npm.git</connection>
-    <developerConnection>scm:git:git@github.com:nodyn/jvm-npm.git</developerConnection>
-    <url>git@github.com:nodyn/jvm-npm.git</url>
-    <tag>HEAD</tag>
+    <connection>scm:git:https://github.com/bsorrentino/jvm-npm</connection>
+    <developerConnection>scm:git:https://github.com/bsorrentino/jvm-npm</developerConnection>
+    <url>https://github.com/bsorrentino/jvm-npm</url>
   </scm>
 
   <licenses>
@@ -46,92 +67,37 @@
   </licenses>
 
   <dependencies>
-    <dependency>
-      <groupId>org.mozilla</groupId>
-      <artifactId>rhino</artifactId>
-      <version>1.7.7.1</version>
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>org.dynjs</groupId>
-      <artifactId>dynjs</artifactId>
-      <version>${version.dynjs}</version>
-      <scope>test</scope>
-    </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.12</version>
     </dependency>
-  </dependencies>
+
+</dependencies>
 
   <build>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-webdav-jackrabbit</artifactId>
-        <version>1.0-beta-7</version>
-      </extension>
-    </extensions>
-    
-    <resources>
-      <resource>
-        <directory>src/main/typescript/dist</directory>
-      </resource>
-      <resource>
-          <directory>src/test/javascript</directory>
-          <includes>
-              <include>jvm-jasmine.js</include>
-          </includes>
-      </resource>
-    </resources>
-    
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.10</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <phase>package</phase>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>src/main/typescript/dist/jvm-npm.js</file>
-                  <type>js</type>
-                </artifact>
-                <artifact>
-                  <file>src/main/typescript/dist/jvm-rhino-cl-npm.js</file>
-                  <type>js</type>
-                  <classifier>rhino-cl</classifier>
-                </artifact>
-                <artifact>
-                  <file>src/main/typescript/dist/jvm-rhino-npm.js</file>
-                  <type>js</type>
-                  <classifier>rhino</classifier>
-                </artifact>
-                <artifact>
-                  <file>src/test/javascript/jvm-jasmine.js</file>
-                  <type>js</type>
-                  <classifier>jasmine</classifier>
-                </artifact>
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+
+<pluginManagement>
+<plugins>
+	<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-surefire-plugin</artifactId>
+		<version>2.19.1</version>
+	</plugin>
+
+	<plugin>
+		<groupId>org.codehaus.mojo</groupId>
+		<artifactId>build-helper-maven-plugin</artifactId>
+		<version>1.10</version>
+	</plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.3.2</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
           <encoding>${project.build.sourceEncoding}</encoding>
         </configuration>
       </plugin>
@@ -155,27 +121,13 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.5.0</version>
-        <executions>
-            <execution>
-                <id>Jasmine Integration Tests</id>
-                <phase>integration-test</phase>
-                <goals>
-                    <goal>java</goal>
-                </goals>
-                <configuration>
-                    <mainClass>org.jasmine.test.RhinoClassLoaderTest</mainClass>
-                    <classpathScope>test</classpathScope>
-                    <arguments>
-                    </arguments>
-                </configuration>
-            </execution>
-        </executions>
+</plugins>	
+</pluginManagement>
 
-      </plugin>
-    </plugins>
   </build>
+  <packaging>pom</packaging>
+  <modules>
+  	<module>jvm-npm-rhino</module>
+  	<module>jvm-npm-core</module>
+  </modules>
 </project>
