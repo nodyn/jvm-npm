@@ -110,7 +110,7 @@ public abstract class AbstractRhinoTopLevel extends ImporterTopLevel {
      * @param cx
      * @param module 
      */
-    protected void _load(Context cx, Object[] args, Function funObj) {
+    protected void _load(Context cx, Object[] args, Function funObj) throws Exception{
         if (args == null) {
             return;
         }
@@ -134,7 +134,7 @@ public abstract class AbstractRhinoTopLevel extends ImporterTopLevel {
                     moduleCache.add( module );
 
                 } catch (IOException e) {
-                    throw new RuntimeException(format("error evaluating module [%s]", module), e);
+                    throw new Exception(format("error evaluating module [%s]", module), e);
                 }
 
             } else { // Fallback
@@ -142,10 +142,10 @@ public abstract class AbstractRhinoTopLevel extends ImporterTopLevel {
                 final java.io.File file = new java.io.File(module);
 
                 if (!file.exists()) {
-                    throw new RuntimeException(format("module [%s] doesn't exist!", module));
+                    throw new Exception(format("module [%s] doesn't exist!", module));
                 }
                 if (!file.isFile()) {
-                    throw new RuntimeException(format("module [%s] is not a file exist!", module));
+                    throw new Exception(format("module [%s] is not a file exist!", module));
                 }
 
                 try( java.io.FileReader reader = new java.io.FileReader(file) ) {
@@ -155,7 +155,7 @@ public abstract class AbstractRhinoTopLevel extends ImporterTopLevel {
                     moduleCache.add( module );
 
                 } catch (IOException e) {
-                    throw new RuntimeException(format("error evaluating module [%s]", module), e);
+                    throw new Exception(format("error evaluating module [%s]", module), e);
                 }
 
             }

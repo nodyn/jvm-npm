@@ -2,6 +2,7 @@ package org.javascript.rhino;
 
 
 import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
@@ -41,11 +42,16 @@ public final class JSR223RhinoTopLevel extends AbstractRhinoTopLevel {
      * @param funObj
      * @throws Exception 
      */
-    public static void load(Context cx, Scriptable thisObj, Object[] args, Function funObj) throws Exception {
+    public static void load(Context cx, Scriptable thisObj, Object[] args, Function funObj) throws ScriptException {
         
         final JSR223RhinoTopLevel _this = deref(thisObj);
         
+        try {
         _this._load(cx, args, funObj );
+        }
+        catch( Exception ex ) {
+        	throw new ScriptException(ex);
+        }
     }
     
     /**
