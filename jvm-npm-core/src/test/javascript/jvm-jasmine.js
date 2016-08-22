@@ -39,12 +39,11 @@ function describe( msg, cb, config ) {
 
     out.println( msg );
 
-    if( jasmine.beforeEach ) jasmine.beforeEach();
-
     cb.call(this);
 }
 
 function it( msg, cb, config ) {
+    if( jasmine.beforeEach ) jasmine.beforeEach();
 
     out.print( "\t"); out.print(msg);
 
