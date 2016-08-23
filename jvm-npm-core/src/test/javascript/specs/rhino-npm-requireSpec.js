@@ -34,9 +34,9 @@ beforeEach( function() {
   require.cache = [];
 });
 
-describe("NPM module test", function() {
+describe("accessory test", function() {
 
-	function myfunction() {}
+	function myfunction( a, b ) { return "result " + a + " " + b; }
 	
 	it("get name of function", function() {
 		var dbg = require('debug');
@@ -44,6 +44,14 @@ describe("NPM module test", function() {
 	    expect(dbg.debug).toBeDefined();
 	    expect(typeof dbg.debug).toBe('function');
 	    expect(dbg.debug(myfunction)).toBe('myfunction');
+	    	    
+	  });
+	it("proxy function", function() {
+		var dbg = require('debug');
+	    expect(dbg).toBeDefined();
+	    expect(dbg.D).toBeDefined();
+	    expect(typeof dbg.D).toBe('function');
+	    expect(dbg.D(myfunction, '1', '2' )).toBe('result 1 2');
 	    	    
 	  });
 
