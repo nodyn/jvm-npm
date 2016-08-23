@@ -34,6 +34,21 @@ beforeEach( function() {
   require.cache = [];
 });
 
+describe("NPM module test", function() {
+
+	function myfunction() {}
+	
+	it("get name of function", function() {
+		var dbg = require('debug');
+	    expect(dbg).toBeDefined();
+	    expect(dbg.debug).toBeDefined();
+	    expect(typeof dbg.debug).toBe('function');
+	    expect(dbg.debug(myfunction)).toBe('myfunction');
+	    	    
+	  });
+
+});
+
 describe("NPM global require()", function() {
 
   it("should be a function", function() {
