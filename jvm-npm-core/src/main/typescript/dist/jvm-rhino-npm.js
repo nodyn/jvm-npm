@@ -127,6 +127,19 @@ module = (typeof module == 'undefined') ? {} : module;
     }());
     require = Require;
     module.exports = Module;
+    function _D(func, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+        if (Require.debug)
+            print(func['name'], a0 || '', a1 || '', a2 || '', a3 || '', a4 || '', a5 || '', a6 || '', a7 || '', a8 || '', a9 || '');
+        var result = func(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+        if (Require.debug)
+            print("result:\t", result);
+        return result;
+    }
+    function _D1(func, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
+        if (Require.debug)
+            print(func['name'], a0 || '', a1 || '', a2 || '', a3 || '', a4 || '', a5 || '', a6 || '', a7 || '', a8 || '', a9 || '');
+        return func(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+    }
     function findRoots(parent) {
         var r = [];
         r.push(findRoot(parent));
@@ -146,13 +159,16 @@ module = (typeof module == 'undefined') ? {} : module;
         Require.cache[file] = json;
         return json;
     }
-    function resolveAsNodeModule(id, root) {
+    function _resolveAsNodeModule(id, root) {
         var base = [root, 'node_modules'].join('/');
         return resolveAsFile(id, base) ||
             resolveAsDirectory(id, base) ||
             (root ? resolveAsNodeModule(id, new File(root).getParent()) : false);
     }
-    function resolveAsDirectory(id, root) {
+    function resolveAsNodeModule(id, root) {
+        return _D(_resolveAsNodeModule, id, root);
+    }
+    function _resolveAsDirectory(id, root) {
         var base = [root, id].join('/'), file = new File([base, 'package.json'].join('/'));
         if (file.exists()) {
             try {
@@ -169,7 +185,10 @@ module = (typeof module == 'undefined') ? {} : module;
         }
         return resolveAsFile('index.js', base);
     }
-    function resolveAsFile(id, root, ext) {
+    function resolveAsDirectory(id, root) {
+        return _D(_resolveAsDirectory, id, root);
+    }
+    function _resolveAsFile(id, root, ext) {
         var file;
         if (id.length > 0 && id[0] === '/') {
             file = new File(normalizeName(id, ext || '.js'));
@@ -184,6 +203,9 @@ module = (typeof module == 'undefined') ? {} : module;
             return file.getCanonicalPath();
         }
     }
+    function resolveAsFile(id, root, ext) {
+        return _D(_resolveAsFile, id, root, ext);
+    }
     function resolveCoreModule(id, root) {
         var name = normalizeName(id);
         var classloader = Thread.currentThread().getContextClassLoader();
@@ -197,7 +219,7 @@ module = (typeof module == 'undefined') ? {} : module;
         }
         return fileName + extension;
     }
-    function readFile(filename, core) {
+    function _readFile(filename, core) {
         var input;
         try {
             if (core) {
@@ -212,5 +234,8 @@ module = (typeof module == 'undefined') ? {} : module;
         catch (e) {
             throw new ModuleError("Cannot read file [" + input + "]: ", "IO_ERROR", e);
         }
+    }
+    function readFile(filename, core) {
+        return _D1(_readFile, filename, core);
     }
 }());
