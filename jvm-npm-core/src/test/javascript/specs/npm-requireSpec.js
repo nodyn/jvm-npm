@@ -127,7 +127,7 @@ describe("NPM global require()", function() {
     expect(outer2).toBe(outer);
   });
 
-  it("should handle cyclic dependencies", function() {
+  it("should handle cyclic ", function() {
     var main = require('./lib/cyclic');
     expect(main.a.fromA).toBe('Hello from A');
     expect(main.b.fromB).toBe('Hello from B');
