@@ -42,7 +42,7 @@ module = (typeof module == 'undefined') ? {} : module;
         Module._load = function (file, parent, core, main) {
             var module = new Module(file, parent, core);
             var __FILENAME__ = module.filename;
-            var body = readFile(module.filename, module.core), dir = new File(module.filename).getParent(), args = ['exports', 'module', 'require', '__filename', '__dirname'], func = new Function(args, body);
+            var body = Resolve.readFile(module.filename, module.core), dir = new File(module.filename).getParent(), args = ['exports', 'module', 'require', '__filename', '__dirname'], func = new Function(args, body);
             func.apply(module, [module.exports, module, module.require, module.filename, dir]);
             module.loaded = true;
             module.main = main;
@@ -102,14 +102,17 @@ module = (typeof module == 'undefined') ? {} : module;
             }
         }
         Require.resolve = function (id, parent) {
+            if (Require.debug) {
+                print("\n\nRESOLVE:", id);
+            }
             var roots = findRoots(parent);
             for (var i = 0; i < roots.length; ++i) {
                 var root = roots[i];
-                var result = resolveCoreModule(id, root) ||
-                    resolveAsFile(id, root, '.js') ||
-                    resolveAsFile(id, root, '.json') ||
-                    resolveAsDirectory(id, root) ||
-                    resolveAsNodeModule(id, root);
+                var result = Resolve.asCoreModule(id, root) ||
+                    Resolve.asFile(id, root, '.js') ||
+                    Resolve.asFile(id, root, '.json') ||
+                    Resolve.asDirectory(id, root) ||
+                    Resolve.asNodeModule(id, root);
                 if (result) {
                     return result;
                 }
@@ -127,18 +130,66 @@ module = (typeof module == 'undefined') ? {} : module;
     }());
     require = Require;
     module.exports = Module;
-    function _D(func, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
-        if (Require.debug)
-            print(func['name'], a0 || '', a1 || '', a2 || '', a3 || '', a4 || '', a5 || '', a6 || '', a7 || '', a8 || '', a9 || '');
-        var result = func(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
-        if (Require.debug)
-            print("result:\t", result);
-        return result;
+    var Resolve = (function () {
+        function Resolve() {
+        }
+        Resolve.asFile = _resolveAsFile;
+        Resolve.asDirectory = _resolveAsDirectory;
+        Resolve.readFile = _readFile;
+        Resolve.asNodeModule = _resolveAsNodeModule;
+        Resolve.asCoreModule = _resolveAsCoreModule;
+        return Resolve;
+    }());
+    var indent = 0;
+    if (Require.debug) {
+        Resolve.asFile = function (id, root, ext) {
+            print(repeat(indent), "resolveAsFile", id, root, ext);
+            ++indent;
+            var result = _resolveAsFile(id, root, ext);
+            --indent;
+            return result;
+        };
+        Resolve.asDirectory = function (id, root) {
+            print(repeat(indent), "resolveAsDirectory", id, root);
+            ++indent;
+            var result = _resolveAsDirectory(id, root);
+            --indent;
+            print(repeat(indent), "result:", result);
+            return result;
+        };
+        Resolve.asNodeModule = function (id, root) {
+            print(repeat(indent), "resolveAsNodeModule", id, root);
+            ++indent;
+            var result = _resolveAsNodeModule(id, root);
+            --indent;
+            print(repeat(indent), "result:", result);
+            return result;
+        };
+        Resolve.readFile = function (filename, core) {
+            print(repeat(indent), "readFile", filename, core);
+            return _readFile(filename, core);
+        };
+        Resolve.asCoreModule = function (id, root) {
+            print(repeat(indent), "resolveAsCoreModule", id, root);
+            ++indent;
+            var result = _resolveAsCoreModule(id, root);
+            --indent;
+            print(repeat(indent), "result:", (result) ? result.path : result);
+            return result;
+        };
     }
-    function _D1(func, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9) {
-        if (Require.debug)
-            print(func['name'], a0 || '', a1 || '', a2 || '', a3 || '', a4 || '', a5 || '', a6 || '', a7 || '', a8 || '', a9 || '');
-        return func(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+    function repeat(n, ch) {
+        if (ch === void 0) { ch = "-"; }
+        if (n <= 0)
+            return ">";
+        return new Array(n * 4).join(ch);
+    }
+    function relativeToRoot(p) {
+        if (p.startsWith(Require.root)) {
+            var len = Paths.get(Require.root).getNameCount();
+            p = p.subpath(len, p.getNameCount());
+        }
+        return p;
     }
     function findRoots(parent) {
         var r = [];
@@ -155,62 +206,9 @@ module = (typeof module == 'undefined') ? {} : module;
         return path.getParent() || "";
     }
     function loadJSON(file) {
-        var json = JSON.parse(readFile(file));
+        var json = JSON.parse(Resolve.readFile(file));
         Require.cache[file] = json;
         return json;
-    }
-    function _resolveAsNodeModule(id, root) {
-        var base = [root, 'node_modules'].join('/');
-        return resolveAsFile(id, base) ||
-            resolveAsDirectory(id, base) ||
-            (root ? resolveAsNodeModule(id, new File(root).getParent()) : false);
-    }
-    function resolveAsNodeModule(id, root) {
-        return _D(_resolveAsNodeModule, id, root);
-    }
-    function _resolveAsDirectory(id, root) {
-        var base = [root, id].join('/'), file = new File([base, 'package.json'].join('/'));
-        if (file.exists()) {
-            try {
-                var body = readFile(file.getCanonicalPath()), package = JSON.parse(body);
-                if (package.main) {
-                    return (resolveAsFile(package.main, base) ||
-                        resolveAsDirectory(package.main, base));
-                }
-                return resolveAsFile('index.js', base);
-            }
-            catch (ex) {
-                throw new ModuleError("Cannot load JSON file", "PARSE_ERROR", ex);
-            }
-        }
-        return resolveAsFile('index.js', base);
-    }
-    function resolveAsDirectory(id, root) {
-        return _D(_resolveAsDirectory, id, root);
-    }
-    function _resolveAsFile(id, root, ext) {
-        var file;
-        if (id.length > 0 && id[0] === '/') {
-            file = new File(normalizeName(id, ext || '.js'));
-            if (!file.exists()) {
-                return resolveAsDirectory(id);
-            }
-        }
-        else {
-            file = new File([root, normalizeName(id, ext || '.js')].join('/'));
-        }
-        if (file.exists()) {
-            return file.getCanonicalPath();
-        }
-    }
-    function resolveAsFile(id, root, ext) {
-        return _D(_resolveAsFile, id, root, ext);
-    }
-    function resolveCoreModule(id, root) {
-        var name = normalizeName(id);
-        var classloader = Thread.currentThread().getContextClassLoader();
-        if (classloader.getResource(name))
-            return { path: name, core: true };
     }
     function normalizeName(fileName, extension) {
         if (extension === void 0) { extension = '.js'; }
@@ -218,6 +216,54 @@ module = (typeof module == 'undefined') ? {} : module;
             return fileName;
         }
         return fileName + extension;
+    }
+    function _resolveAsNodeModule(id, root) {
+        var base = [root, 'node_modules'].join('/');
+        return Resolve.asFile(id, base) ||
+            Resolve.asDirectory(id, base) ||
+            (root ? Resolve.asNodeModule(id, new File(root).getParent()) : false);
+    }
+    function _resolveAsDirectory(id, root) {
+        var base = [root, id].join('/'), file = new File([base, 'package.json'].join('/'));
+        if (file.exists()) {
+            try {
+                var body = Resolve.readFile(file.getCanonicalPath()), package = JSON.parse(body);
+                if (package.main) {
+                    return (Resolve.asFile(package.main, base) ||
+                        Resolve.asDirectory(package.main, base));
+                }
+                return Resolve.asFile('index.js', base);
+            }
+            catch (ex) {
+                throw new ModuleError("Cannot load JSON file", "PARSE_ERROR", ex);
+            }
+        }
+        return Resolve.asFile('index.js', base);
+    }
+    function _resolveAsFile(id, root, ext) {
+        var file;
+        if (id.length > 0 && id[0] === '/') {
+            file = new File(normalizeName(id, ext || '.js'));
+            if (!file.exists()) {
+                return Resolve.asDirectory(id);
+            }
+        }
+        else {
+            file = new File([root, normalizeName(id, ext || '.js')].join('/'));
+        }
+        if (file.exists()) {
+            var result = file.getCanonicalPath();
+            if (Require.debug) {
+                print(repeat(indent - 1), "result:", relativeToRoot(file.toPath()));
+            }
+            return result;
+        }
+    }
+    function _resolveAsCoreModule(id, root) {
+        var name = normalizeName(id);
+        var classloader = Thread.currentThread().getContextClassLoader();
+        if (classloader.getResource(name))
+            return { path: name, core: true };
     }
     function _readFile(filename, core) {
         var input;
@@ -234,8 +280,5 @@ module = (typeof module == 'undefined') ? {} : module;
         catch (e) {
             throw new ModuleError("Cannot read file [" + input + "]: ", "IO_ERROR", e);
         }
-    }
-    function readFile(filename, core) {
-        return _D1(_readFile, filename, core);
     }
 }());

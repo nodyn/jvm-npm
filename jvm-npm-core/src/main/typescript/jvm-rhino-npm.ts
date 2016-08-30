@@ -51,7 +51,7 @@ module = (typeof module == 'undefined') ? {} :  module;
     static _load(file, parent, core:boolean, main?:boolean) {
       var module = new Module(file, parent, core);
       var __FILENAME__ = module.filename;
-      var body   = readFile(module.filename, module.core),
+      var body   = Resolve.readFile(module.filename, module.core),
           dir    = new File(module.filename).getParent(),
           args   = ['exports', 'module', 'require', '__filename', '__dirname'],
           func   = new Function(args, body);
@@ -90,14 +90,17 @@ module = (typeof module == 'undefined') ? {} :  module;
     static extensions = {};
 
     static resolve(id, parent?) {
+      if( Require.debug ) {
+        print( "\n\nRESOLVE:", id );
+      }
       var roots = findRoots(parent);
       for ( var i = 0 ; i < roots.length ; ++i ) {
         var root = roots[i];
-        var result = resolveCoreModule(id, root) ||
-          resolveAsFile(id, root, '.js')   ||
-          resolveAsFile(id, root, '.json') ||
-          resolveAsDirectory(id, root)     ||
-          resolveAsNodeModule(id, root);
+        var result = Resolve.asCoreModule(id, root) ||
+          Resolve.asFile(id, root, '.js')   ||
+          Resolve.asFile(id, root, '.json') ||
+          Resolve.asDirectory(id, root)     ||
+          Resolve.asNodeModule(id, root);
         if ( result ) {
           return result;
         }
@@ -153,20 +156,83 @@ module = (typeof module == 'undefined') ? {} :  module;
   require         = Require;
   module.exports  = Module;
 
-  function _D( func:Function, a0?, a1?, a2?, a3?, a4?, a5?, a6?, a7?, a8?, a9?  ) {
-  	//if( typeof func == 'function' ) {
-  		if(Require.debug ) print( func['name'], a0||'', a1||'', a2||'', a3||'', a4||'', a5||'', a6||'', a7||'', a8||'', a9||'' );
-  		var result = func( a0, a1, a2, a3, a4, a5, a6, a7, a8, a9 );
-  		if(Require.debug ) print( "result:\t", result);
-  		return result;
-  	//}
+  class Resolve {
+
+    static asFile:(id, root, ext?:string) => any = _resolveAsFile;
+
+    static asDirectory:(id, root?) => any = _resolveAsDirectory;
+
+    static readFile:(filename, core?:boolean) => any = _readFile;
+
+    static asNodeModule:(id, root) => any = _resolveAsNodeModule;
+
+    static asCoreModule:(id, root) => any = _resolveAsCoreModule;
+
   }
 
-  function _D1( func:Function, a0?, a1?, a2?, a3?, a4?, a5?, a6?, a7?, a8?, a9?  ) {
-  	//if( typeof func == 'function' ) {
-  		if(Require.debug ) print( func['name'], a0||'', a1||'', a2||'', a3||'', a4||'', a5||'', a6||'', a7||'', a8||'', a9||'' );
-  		return func( a0, a1, a2, a3, a4, a5, a6, a7, a8, a9 );
-  	//}
+  let indent = 0;
+
+  if( Require.debug ) {
+
+    Resolve.asFile = (id, root, ext?:string) => {
+
+        print( repeat(indent), "resolveAsFile", id, root, ext );
+        ++indent;
+        let result = _resolveAsFile( id, root, ext );
+        --indent;
+        return result;
+    }
+
+    Resolve.asDirectory = (id, root?) => {
+      print( repeat(indent), "resolveAsDirectory", id, root );
+      ++indent;
+      let result = _resolveAsDirectory( id, root );
+      --indent;
+      print( repeat(indent), "result:", result );
+      return result;
+
+    }
+
+    Resolve.asNodeModule = (id, root) => {
+
+        print( repeat(indent), "resolveAsNodeModule", id, root );
+        ++indent;
+        let result = _resolveAsNodeModule( id, root );
+        --indent;
+        print( repeat(indent), "result:", result );
+        return result;
+    }
+
+
+    Resolve.readFile = (filename, core?:boolean) => {
+      print( repeat(indent), "readFile", filename, core );
+      return _readFile(filename, core);
+    }
+
+    Resolve.asCoreModule = (id, root) => {
+
+        print( repeat(indent), "resolveAsCoreModule", id, root );
+        ++indent;
+        let result = _resolveAsCoreModule( id, root );
+        --indent;
+        print( repeat(indent), "result:", (result) ? result.path : result );
+        return result;
+    }
+
+  }
+
+  function repeat(n:number, ch:string = "-"):string {
+    if( n <=0 ) return ">";
+    return new Array(n*4).join(ch);
+  }
+
+  function relativeToRoot( p:Path ):Path {
+
+    if( p.startsWith(Require.root)) {
+      let len = Paths.get(Require.root).getNameCount();
+      p = p.subpath(len, p.getNameCount());//.normalize();
+    }
+    return p;
   }
 
   function findRoots(parent) {
@@ -187,68 +253,9 @@ module = (typeof module == 'undefined') ? {} :  module;
   }
 
   function loadJSON(file) {
-    var json = JSON.parse(readFile(file));
+    var json = JSON.parse(Resolve.readFile(file));
     Require.cache[file] = json;
     return json;
-  }
-
-
-  function _resolveAsNodeModule(id, root) {
-    var base = [root, 'node_modules'].join('/');
-    return resolveAsFile(id, base) ||
-      resolveAsDirectory(id, base) ||
-      (root ? resolveAsNodeModule(id, new File(root).getParent()) : false);
-  }
-  function resolveAsNodeModule(id, root) {
-    return _D( _resolveAsNodeModule, id, root );
-  }
-
-  function _resolveAsDirectory(id, root?) {
-    var base = [root, id].join('/'),
-        file = new File([base, 'package.json'].join('/'));
-    if (file.exists()) {
-      try {
-        var body = readFile(file.getCanonicalPath()),
-            package  = JSON.parse(body);
-        if (package.main) {
-          return (resolveAsFile(package.main, base) ||
-                  resolveAsDirectory(package.main, base));
-        }
-        // if no package.main exists, look for index.js
-        return resolveAsFile('index.js', base);
-      } catch(ex) {
-        throw new ModuleError("Cannot load JSON file", "PARSE_ERROR", ex);
-      }
-    }
-    return resolveAsFile('index.js', base);
-  }
-  function resolveAsDirectory(id, root?) {
-    return _D( _resolveAsDirectory, id, root );
-  }
-
-  function _resolveAsFile(id, root, ext?:string) {
-    var file;
-    if ( id.length > 0 && id[0] === '/' ) {
-      file = new File(normalizeName(id, ext || '.js'));
-      if (!file.exists()) {
-        return resolveAsDirectory(id);
-      }
-    } else {
-      file = new File([root, normalizeName(id, ext || '.js')].join('/'));
-    }
-    if (file.exists()) {
-      return file.getCanonicalPath();
-    }
-  }
-  function resolveAsFile(id, root, ext?:string) {
-    return _D( _resolveAsFile, id, root, ext);
-  }
-
-  function resolveCoreModule(id, root) {
-    var name = normalizeName(id);
-    var classloader = Thread.currentThread().getContextClassLoader();
-    if (classloader.getResource(name))
-        return { path: name, core: true };
   }
 
   function normalizeName(fileName, extension:string = '.js') {
@@ -256,6 +263,61 @@ module = (typeof module == 'undefined') ? {} :  module;
       return fileName;
     }
     return fileName + extension;
+  }
+
+
+  function _resolveAsNodeModule(id, root) {
+
+    var base = [root, 'node_modules'].join('/');
+    return Resolve.asFile(id, base) ||
+      Resolve.asDirectory(id, base) ||
+      (root ? Resolve.asNodeModule(id, new File(root).getParent()) : false);
+  }
+
+  function _resolveAsDirectory(id, root?) {
+    var base = [root, id].join('/'),
+        file = new File([base, 'package.json'].join('/'));
+    if (file.exists()) {
+      try {
+        var body = Resolve.readFile(file.getCanonicalPath()),
+            package  = JSON.parse(body);
+        if (package.main) {
+          return (Resolve.asFile(package.main, base) ||
+                  Resolve.asDirectory(package.main, base));
+        }
+        // if no package.main exists, look for index.js
+        return Resolve.asFile('index.js', base);
+      } catch(ex) {
+        throw new ModuleError("Cannot load JSON file", "PARSE_ERROR", ex);
+      }
+    }
+    return Resolve.asFile('index.js', base);
+  }
+
+  function _resolveAsFile(id, root, ext?:string) {
+    var file;
+    if ( id.length > 0 && id[0] === '/' ) {
+      file = new File(normalizeName(id, ext || '.js'));
+      if (!file.exists()) {
+        return Resolve.asDirectory(id);
+      }
+    } else {
+      file = new File([root, normalizeName(id, ext || '.js')].join('/'));
+    }
+    if (file.exists()) {
+      let result = file.getCanonicalPath();
+      if( Require.debug ) {
+          print( repeat(indent-1), "result:", relativeToRoot(file.toPath()) );
+      }
+      return result;
+    }
+  }
+
+  function _resolveAsCoreModule(id, root) {
+    var name = normalizeName(id);
+    var classloader = Thread.currentThread().getContextClassLoader();
+    if (classloader.getResource(name))
+        return { path: name, core: true };
   }
 
   function _readFile(filename, core?:boolean) {
@@ -272,9 +334,6 @@ module = (typeof module == 'undefined') ? {} :  module;
     } catch(e) {
       throw new ModuleError("Cannot read file ["+input+"]: ", "IO_ERROR", e);
     }
-  }
-  function readFile(filename, core?:boolean) {
-    return _D1( _readFile, filename, core );
   }
 
 
