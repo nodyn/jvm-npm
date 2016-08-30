@@ -63,14 +63,14 @@
                   <type>js</type>
                 </artifact>
                 <artifact>
-                  <file>src/main/typescript/dist/jvm-rhino-cl-npm.js</file>
+                  <file>src/main/typescript/dist/jvm-cl-npm.js</file>
                   <type>js</type>
-                  <classifier>rhino-cl</classifier>
+                  <classifier>cl</classifier>
                 </artifact>
                 <artifact>
-                  <file>src/main/typescript/dist/jvm-rhino-npm.js</file>
+                  <file>src/main/typescript/dist/jvm-npm-legacy.js</file>
                   <type>js</type>
-                  <classifier>rhino</classifier>
+                  <classifier>legacy</classifier>
                 </artifact>
                 <artifact>
                   <file>src/test/javascript/jvm-jasmine.js</file>
