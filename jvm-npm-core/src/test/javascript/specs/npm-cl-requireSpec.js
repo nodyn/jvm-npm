@@ -1,6 +1,6 @@
 /**
  *
- * JASMINE TEST FOR RHINO + RHINO-NPM WITH NATIVE REQUIRE FOR LOOKUP IN CLASSLOADER
+ * JASMINE TEST FOR RHINO + RHINO-NPM & NASHORN WITH NATIVE REQUIRE FOR LOOKUP IN CLASSLOADER
  *
  */
 
@@ -17,7 +17,7 @@ var cwd = Paths.get(
 System.setProperty('user.dir', cwd); // set current dir
 
 // Load the NPM module loader into the global scope
-load('src/main/typescript/dist/jvm-rhino-cl-npm.js');
+load('src/main/typescript/dist/jvm-cl-npm.js');
 
 load('src/test/javascript/jvm-jasmine.js');
 
@@ -236,12 +236,12 @@ describe("Path management", function() {
 
 describe("The Module module", function() {
   it('should exist', function() {
-    var Module = require('jvm-rhino-cl-npm');
+    var Module = require('jvm-cl-npm');
     expect(Module).toBeTruthy();
   });
 
   it('should have a runMain function', function() {
-    var Module = require('jvm-rhino-cl-npm');
+    var Module = require('jvm-cl-npm');
     expect(typeof Module.runMain).toBe('function');
   });
 });

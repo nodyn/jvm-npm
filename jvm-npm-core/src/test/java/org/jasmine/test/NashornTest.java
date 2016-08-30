@@ -15,6 +15,9 @@
  */
 package org.jasmine.test;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -25,12 +28,20 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import static java.lang.String.format;
 
 /**
  *
  * @author softphone
  */
 public class NashornTest {
+	final String javascriptDir = Paths.get("src","test","javascript").toString();
+    
+	final Path jasmine					= Paths.get( javascriptDir, "jvm-jasmine.js");  
+    final Path npmRequireSpecs			= Paths.get( javascriptDir,	"specs", "npm-requireSpec.js");
+    final Path npmCLRequireSpecs		= Paths.get( javascriptDir,	"specs", "npm-cl-requireSpec.js");
+	final Path nativeRequireSpecs		= Paths.get( javascriptDir,	"specs", "native-requireSpec.js");
+	final Path npmNativeRequireSpecs	= Paths.get( javascriptDir,	"specs", "npm-native-requireSpec.js");
     
     ScriptEngineManager manager;
 
@@ -66,7 +77,7 @@ public class NashornTest {
 
         Assert.assertThat(nashorn , IsNull.notNullValue());
         
-        nashorn.eval( "load('src/test/javascript/specs/rhino-npm-requireSpec.js');");
+        nashorn.eval( format("load('%s');", npmRequireSpecs) );
 
         
     }
@@ -77,7 +88,7 @@ public class NashornTest {
 
         Assert.assertThat(nashorn , IsNull.notNullValue());
         
-        nashorn.eval( "load('src/test/javascript/specs/rhino-npm-cl-requireSpec.js');");
+        nashorn.eval( format("load('%s');", npmCLRequireSpecs) );
 
         
     }

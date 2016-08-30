@@ -15,7 +15,7 @@ var home = java.lang.System.getProperty('user.home');
 require.pushLoadPath(cwd);
 
 // Load the NPM module loader into the global scope
-load('src/main/typescript/dist/jvm-npm.js');
+load('src/main/typescript/dist/jvm-npm-legacy.js');
 
 // Tell require where it's root is
 require.root = cwd;
