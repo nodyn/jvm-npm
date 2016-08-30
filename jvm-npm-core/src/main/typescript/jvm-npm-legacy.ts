@@ -1,8 +1,21 @@
 /**
+ *  Copyright 2014 Lance Ball
  *
- * JVM-NPM TAILORED FOR RHINO JS ENGINE
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
+// Since we intend to use the Function constructor.
+/* jshint evil: true */
+
 /// <reference path="jvm-npm.d.ts" />
 
 module = (typeof module == 'undefined') ? {} :  module;
@@ -10,14 +23,19 @@ module = (typeof module == 'undefined') ? {} :  module;
 (function() {
   var System  = java.lang.System,
       Scanner = java.util.Scanner,
-      File    = java.io.File,
-      Paths = java.nio.file.Paths,
-      Thread = java.lang.Thread
-      ;
+      File    = java.io.File;
 
   NativeRequire = (typeof NativeRequire === 'undefined') ? {} : NativeRequire;
   if (typeof require === 'function' && !NativeRequire.require) {
     NativeRequire.require = require;
+  }
+
+  // Helper function until ECMAScript 6 is complete
+  if (typeof String.prototype.endsWith !== 'function') {
+    String.prototype.endsWith = function(suffix) {
+      if (!suffix) return false;
+      return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    };
   }
 
   function ModuleError(message:string, code:string, cause?:any) {
@@ -29,15 +47,17 @@ module = (typeof module == 'undefined') ? {} :  module;
   ModuleError.prototype = new Error();
   ModuleError.prototype.constructor = ModuleError;
 
+  /**
+   * Module
+   */
   class Module {
 
     children = [];
-    filename;
+    filename:string;
     loaded = false;
+    _exports:any;
     require:Function;
     main:boolean;
-
-    _exports:any;
 
     get exports():any {
      return this._exports;
@@ -47,7 +67,24 @@ module = (typeof module == 'undefined') ? {} :  module;
       this._exports = val;
     }
 
-    static _load(file, parent, core:boolean, main?:boolean) {
+    constructor( public id, private parent:Module, private core:boolean) {
+      this.filename = id ;
+
+      if (parent && parent.children) parent.children.push(this);
+
+      this.require = (id) => {
+        return Require.call(this, id, this);
+      }
+
+      this.exports = {};
+    }
+    /**
+     * _load
+     *
+     */
+    static _load( file, parent:Module, core:boolean, main?:boolean ):any {
+      // print( "_load", file, parent, core, main );
+
       var module = new Module(file, parent, core);
       var __FILENAME__ = module.filename;
       var body   = readFile(module.filename, module.core),
@@ -63,29 +100,17 @@ module = (typeof module == 'undefined') ? {} :  module;
 
     static runMain(main) {
       var file = Require.resolve(main);
-      Module._load(file, undefined, false, true);
+      Module._load(file.path, undefined, file.core, true);
+
     }
-
-    constructor( public id, private parent:Module, private core:boolean) {
-      this.filename = id;
-
-      this.exports = {};
-
-      if (parent && parent.children) parent.children.push(this);
-
-      this.require = (id) => {
-        return Require.call(this, id, this);
-      }
-    }
-
   }
 
   class Require {
-    static root:string = System.getProperty('user.dir');
+
+    static root:string      = System.getProperty('user.dir');
     static NODE_PATH:string = undefined;
-    static paths = [];
     static debug = true;
-    static cache: { [s: string]: any; } = {};
+    static cache = {};
     static extensions = {};
 
     static resolve(id, parent?) {
@@ -104,25 +129,37 @@ module = (typeof module == 'undefined') ? {} :  module;
       return false;
     };
 
+    static paths() {
+      var r = [];
+      r.push( java.lang.System.getProperty( "user.home" ) + "/.node_modules" );
+      r.push( java.lang.System.getProperty( "user.home" ) + "/.node_libraries" );
+
+      if ( Require.NODE_PATH ) {
+        r = r.concat( parsePaths( Require.NODE_PATH ) );
+      } else {
+        var NODE_PATH = java.lang.System.getenv.NODE_PATH;
+        if ( NODE_PATH ) {
+          r = r.concat( parsePaths( NODE_PATH ) );
+        }
+      }
+      // r.push( $PREFIX + "/node/library" );
+      return r;
+    };
+
+
     constructor(id, parent) {
       var core, native, file = Require.resolve(id, parent);
 
       if (!file) {
         if (typeof NativeRequire.require === 'function') {
           if (Require.debug) {
-            System.out.println(['cannot resolve', id, 'defaulting to native'].join(' '));
+            System.out.println(['Cannot resolve', id, 'defaulting to native'].join(' '));
           }
-          try {
-              native = NativeRequire.require(id);
-              if (native) return native;
-          }catch(e) {
-            throw new ModuleError("cannot load module " + id, "MODULE_NOT_FOUND");
-          }
+          native = NativeRequire.require(id);
+          if (native) return native;
         }
-        if (Require.debug) {
-          System.err.println("cannot load module " + id);
-        }
-        throw new ModuleError("cannot load module " + id, "MODULE_NOT_FOUND");
+        System.err.println("Cannot find module " + id);
+        throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
       }
 
       if (file.core) {
@@ -132,9 +169,9 @@ module = (typeof module == 'undefined') ? {} :  module;
       try {
         if (Require.cache[file]) {
           return Require.cache[file];
-        } else if (String(file).endsWith('.js')) {
+        } else if (file.endsWith('.js')) {
           return Module._load(file, parent, core);
-        } else if (String(file).endsWith('.json')) {
+        } else if (file.endsWith('.json')) {
           return loadJSON(file);
         }
       } catch(ex) {
@@ -149,25 +186,42 @@ module = (typeof module == 'undefined') ? {} :  module;
 
   }
 
-  require         = Require;
-  module.exports  = Module;
 
   function findRoots(parent) {
     var r = [];
     r.push( findRoot( parent ) );
-    return r.concat( Require.paths );
+    return r.concat( Require.paths() );
   }
 
-  function findRoot(parent):string {
+  function parsePaths(paths) {
+    if ( ! paths ) {
+      return [];
+    }
+    if ( paths === '' ) {
+      return [];
+    }
+    var osName = java.lang.System.getProperty("os.name").toLowerCase();
+    var separator;
+
+    if ( osName.indexOf( 'win' ) >= 0 ) {
+      separator = ';';
+    } else {
+      separator = ':';
+    }
+
+    return paths.split( separator );
+  }
+
+  function findRoot(parent) {
     if (!parent || !parent.id) { return Require.root; }
-
-    var path = ( parent.id instanceof java.nio.file.Path ) ?
-      (parent.id as Path) :
-      Paths.get( parent.id );
-
-    return path.getParent() || "";
-
+    var pathParts = parent.id.split(/[\/|\\,]+/g);
+    pathParts.pop();
+    return pathParts.join('/');
   }
+
+  require = Require;
+  module.exports = Module;
+
 
   function loadJSON(file) {
     var json = JSON.parse(readFile(file));
@@ -219,13 +273,13 @@ module = (typeof module == 'undefined') ? {} :  module;
 
   function resolveCoreModule(id, root) {
     var name = normalizeName(id);
-    var classloader = Thread.currentThread().getContextClassLoader();
+    var classloader = java.lang.Thread.currentThread().getContextClassLoader();
     if (classloader.getResource(name))
         return { path: name, core: true };
   }
 
-  function normalizeName(fileName, extension:string = '.js') {
-    if (String(fileName).endsWith(extension)) {
+  function normalizeName(fileName, extension = '.js') {
+    if (fileName.endsWith(extension)) {
       return fileName;
     }
     return fileName + extension;
@@ -235,7 +289,7 @@ module = (typeof module == 'undefined') ? {} :  module;
     var input;
     try {
       if (core) {
-        var classloader = Thread.currentThread().getContextClassLoader();
+        var classloader = java.lang.Thread.currentThread().getContextClassLoader();
         input = classloader.getResourceAsStream(filename);
       } else {
         input = new File(filename);

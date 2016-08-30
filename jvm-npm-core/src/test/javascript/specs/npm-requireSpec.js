@@ -1,6 +1,6 @@
 /**
  *
- * JASMINE TEST FOR RHINO + RHINO-NPM WITH NATIVE REQUIRE
+ * JASMINE TEST FOR RHINO + RHINO-NPM & NASHORN WITHOUT NATIVE REQUIRE
  *
  */
 
@@ -19,7 +19,7 @@ var home = System.getProperty('user.home');
 System.setProperty('user.dir', cwd); // set current dir
 
 // Load the NPM module loader into the global scope
-load('src/main/typescript/dist/jvm-rhino-npm.js');
+load('src/main/typescript/dist/jvm-npm.js');
 
 require.root = cwd;
 require.paths = [
@@ -30,25 +30,34 @@ require.paths = [
 
 load('src/test/javascript/jvm-jasmine.js');
 
-
-describe("NativeRequire", function() {
+beforeEach( function() {
   require.cache = [];
-
-  it("should be a global object", function(){
-    expect(typeof NativeRequire).toBe('object');
-  });
-
-  it("should expose Rhino' builtin require() function", function(){
-    expect(typeof NativeRequire.require).toBe('function');
-    var f = NativeRequire.require('lib/native_test_module');
-    expect(f).toBe("Foo!");
-    //expect(NativeRequire.require instanceof org.mozilla.javascript.commonjs.module.Require).toBe(true);
-  });
 });
 
+describe("accessory test", function() {
+
+	function myfunction( a, b ) { return "result " + a + " " + b; }
+	
+	it("get name of function", function() {
+		var dbg = require('debug');
+	    expect(dbg).toBeDefined();
+	    expect(dbg.debug).toBeDefined();
+	    expect(typeof dbg.debug).toBe('function');
+	    expect(dbg.debug(myfunction)).toBe('myfunction');
+	    	    
+	  });
+	it("proxy function", function() {
+		var dbg = require('debug');
+	    expect(dbg).toBeDefined();
+	    expect(dbg.D).toBeDefined();
+	    expect(typeof dbg.D).toBe('function');
+	    expect(dbg.D(myfunction, '1', '2' )).toBe('result 1 2');
+	    	    
+	  });
+
+});
 
 describe("NPM global require()", function() {
-  require.cache = [];
 
   it("should be a function", function() {
     expect(typeof require).toBe('function');
@@ -118,7 +127,7 @@ describe("NPM global require()", function() {
     expect(outer2).toBe(outer);
   });
 
-  it("should handle cyclic dependencies", function() {
+  it("should handle cyclic ", function() {
     var main = require('./lib/cyclic');
     expect(main.a.fromA).toBe('Hello from A');
     expect(main.b.fromB).toBe('Hello from B');
@@ -219,12 +228,12 @@ describe("Core modules", function() {
 
 describe("The Module module", function() {
   it('should exist', function() {
-    var Module = require('jvm-rhino-npm');
+    var Module = require('jvm-npm');
     expect(Module).toBeTruthy();
   });
 
   it('should have a runMain function', function() {
-    var Module = require('jvm-rhino-npm');
+    var Module = require('jvm-npm');
     expect(typeof Module.runMain).toBe('function');
   });
 });
