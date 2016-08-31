@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.bsc</groupId>
     <artifactId>jvm-npm</artifactId>
-    <version>0.3.0</version>
+    <version>0.3.1</version>
   </parent>
   <artifactId>jvm-npm-core</artifactId>
   <name>JVM-NPM::Core</name>
@@ -63,14 +63,14 @@
                   <type>js</type>
                 </artifact>
                 <artifact>
-                  <file>src/main/typescript/dist/jvm-rhino-cl-npm.js</file>
+                  <file>src/main/typescript/dist/jvm-cl-npm.js</file>
                   <type>js</type>
-                  <classifier>rhino-cl</classifier>
+                  <classifier>cl</classifier>
                 </artifact>
                 <artifact>
-                  <file>src/main/typescript/dist/jvm-rhino-npm.js</file>
+                  <file>src/main/typescript/dist/jvm-npm-legacy.js</file>
                   <type>js</type>
-                  <classifier>rhino</classifier>
+                  <classifier>legacy</classifier>
                 </artifact>
                 <artifact>
                   <file>src/test/javascript/jvm-jasmine.js</file>

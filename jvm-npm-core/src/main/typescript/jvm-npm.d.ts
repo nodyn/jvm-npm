@@ -9,6 +9,7 @@ declare namespace java {
         var Thread: any;
         var Exception: any;
         var Thread: any;
+        var Boolean: any;
     }
     namespace io {
         var File: any;
@@ -20,7 +21,9 @@ declare namespace java {
                 normalize(): Path;
                 resolve(p: string): Path;
                 getParent(): Path;
-                startsWith(p: Path): boolean;
+                startsWith(p: Path|string): boolean;
+                subpath(s:number, e:number): Path;
+                getNameCount(): number;
             }
             var Paths: any;
             var Path: any;

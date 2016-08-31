@@ -1,6 +1,6 @@
 /**
  *
- * JASMINE TEST FOR RHINO WITH NATIVE REQUIRE
+ * JASMINE TEST FOR RHINO & NASHORN WITH NATIVE REQUIRE
  *
  */
 
@@ -170,12 +170,12 @@ describe("Core modules", function() {
 
 describe("The Module module", function() {
   it('should exist', function() {
-    var Module = require('jvm-rhino-npm');
+    var Module = require('jvm-npm');
     expect(Module).toBeTruthy();
   });
 
   it('should have a runMain function', function() {
-    var Module = require('jvm-rhino-npm');
+    var Module = require('jvm-npm');
     expect(typeof Module.runMain).toBe('function');
   });
 });

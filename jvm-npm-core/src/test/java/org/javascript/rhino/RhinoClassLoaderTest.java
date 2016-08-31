@@ -24,7 +24,7 @@ import static java.lang.String.format;
 public class RhinoClassLoaderTest {
 	final String javascriptDir = Paths.get("src", "test", "javascript").toString();
     
-	final Path npmCLRequireSpecs	= Paths.get( javascriptDir,	"specs", "rhino-npm-cl-requireSpec.js");
+	final Path npmCLRequireSpecs	= Paths.get( javascriptDir,	"specs", "npm-cl-requireSpec.js");
 
     ContextFactory contextFactory;
 

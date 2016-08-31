@@ -30,9 +30,9 @@ public class RhinoTest {
 	final String javascriptDir = Paths.get("src","test","javascript").toString();
     
 	final Path jasmine					= Paths.get( javascriptDir, "jvm-jasmine.js");  
-    final Path npmRequireSpecs			= Paths.get( javascriptDir,	"specs", "rhino-npm-requireSpec.js");
-	final Path nativeRequireSpecs		= Paths.get( javascriptDir,	"specs", "rhino-native-requireSpec.js");
-	final Path npmNativeRequireSpecs	= Paths.get( javascriptDir,	"specs", "rhino-npm-native-requireSpec.js");
+    final Path npmRequireSpecs			= Paths.get( javascriptDir,	"specs", "npm-requireSpec.js");
+	final Path nativeRequireSpecs		= Paths.get( javascriptDir,	"specs", "native-requireSpec.js");
+	final Path npmNativeRequireSpecs	= Paths.get( javascriptDir,	"specs", "npm-native-requireSpec.js");
 	
     ContextFactory contextFactory;
 
@@ -152,12 +152,8 @@ public class RhinoTest {
 
         Assert.assertThat(rhino , IsNull.notNullValue());
         
-        rhino.eval( new StringBuilder()
-                        .append("load('").append(jasmine).append("');\n")
-                        .append("load('").append(npmRequireSpecs).append("');\n")
-                        .toString());
-
-        
+        rhino.eval( format( "load('%s');", npmRequireSpecs) );
+      
     }
     
     public static void main( String args[] ) throws Exception {
