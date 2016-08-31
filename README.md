@@ -1,6 +1,6 @@
 # jvm-npm
 
-<a href=http://search.maven.org/#search%7Cga%7C1%7Cjvm-npm-core"><img src="https://img.shields.io/maven-central/v/org.bsc/jvm-npm-core.svg">
+<a href=http://search.maven.org/#search%7Cga%7C1%7Cjvm-npm-core><img src="https://img.shields.io/maven-central/v/org.bsc/jvm-npm-core.svg">
 </a>
 
 
