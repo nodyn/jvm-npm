@@ -1,133 +1,190 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.bsc</groupId>
-  <artifactId>jvm-npm</artifactId>
-  <version>0.3.1-SNAPSHOT</version>
-  <url>http://github.com/bsorrentino/jvm-npm</url>
-  <name>JVM-NPM</name>
+	<groupId>org.bsc</groupId>
+	<artifactId>jvm-npm</artifactId>
+	<version>0.3.1</version>
+	<url>http://github.com/bsorrentino/jvm-npm</url>
+	<name>JVM-NPM</name>
 
-  <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>9</version>
-  </parent>
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>9</version>
+	</parent>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <release.repo.id>sonatype-server</release.repo.id>
-    <release.repo.url>https://oss.sonatype.org/service/local/staging/deploy/maven2</release.repo.url>
-    <snapshot.repo.id>sonatype-server</snapshot.repo.id>
-    <snapshot.repo.url>https://oss.sonatype.org/content/repositories/snapshots</snapshot.repo.url>
-  </properties>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<release.repo.id>sonatype-server</release.repo.id>
+		<release.repo.url>https://oss.sonatype.org/service/local/staging/deploy/maven2</release.repo.url>
+		<snapshot.repo.id>sonatype-server</snapshot.repo.id>
+		<snapshot.repo.url>https://oss.sonatype.org/content/repositories/snapshots</snapshot.repo.url>
+	</properties>
 
-  <developers>
-    <developer>
-      <id>bsorrentino</id>
-      <name>Bartolomeo Sorrentino</name>
-      <url>http://soulsoftware-bsc.blogspot.it/</url>
-      <email>bartolomeo.sorrentino@gmail.com</email>
-    </developer>
+	<developers>
+		<developer>
+			<id>bsorrentino</id>
+			<name>Bartolomeo Sorrentino</name>
+			<url>http://soulsoftware-bsc.blogspot.it/</url>
+			<email>bartolomeo.sorrentino@gmail.com</email>
+		</developer>
 
-    <developer>
-      <id>lanceball</id>
-      <name>Lance Ball</name>
-      <url>http://lanceball.com</url>
-      <email>lball@redhat.com</email>
-    </developer>
-  </developers>
+		<developer>
+			<id>lanceball</id>
+			<name>Lance Ball</name>
+			<url>http://lanceball.com</url>
+			<email>lball@redhat.com</email>
+		</developer>
+	</developers>
 
-    <distributionManagement>
-        <repository>
-            <id>${release.repo.id}</id>
-            <name>central</name>
-            <url>${release.repo.url}</url>
-        </repository>
-        <snapshotRepository>
-            <id>${snapshot.repo.id}</id>
-            <name>snapshots</name>
-            <url>${snapshot.repo.url}</url>
-        </snapshotRepository>
-    </distributionManagement>
+	<distributionManagement>
+		<repository>
+			<id>${release.repo.id}</id>
+			<name>central</name>
+			<url>${release.repo.url}</url>
+		</repository>
+		<snapshotRepository>
+			<id>${snapshot.repo.id}</id>
+			<name>snapshots</name>
+			<url>${snapshot.repo.url}</url>
+		</snapshotRepository>
+	</distributionManagement>
 
-  <scm>
-    <connection>scm:git:https://github.com/bsorrentino/jvm-npm</connection>
-    <developerConnection>scm:git:https://github.com/bsorrentino/jvm-npm</developerConnection>
-    <url>https://github.com/bsorrentino/jvm-npm</url>
-  </scm>
+	<scm>
+		<connection>scm:git:https://github.com/bsorrentino/jvm-npm</connection>
+		<developerConnection>scm:git:https://github.com/bsorrentino/jvm-npm</developerConnection>
+		<url>https://github.com/bsorrentino/jvm-npm</url>
+	</scm>
 
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
 
-  <dependencies>
+	<dependencies>
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
-    </dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+		</dependency>
 
-</dependencies>
+	</dependencies>
 
-  <build>
+	<build>
 
-<pluginManagement>
-<plugins>
-	<plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-surefire-plugin</artifactId>
-		<version>2.19.1</version>
-	</plugin>
+		<pluginManagement>
+			<plugins>
+			    <plugin>
+			        <groupId>org.codehaus.mojo</groupId>
+			        <artifactId>build-helper-maven-plugin</artifactId>
+			        <version>1.12</version>
+			 	</plugin>		
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.19.1</version>
+				</plugin>
 
-	<plugin>
-		<groupId>org.codehaus.mojo</groupId>
-		<artifactId>build-helper-maven-plugin</artifactId>
-		<version>1.10</version>
-	</plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-          <encoding>${project.build.sourceEncoding}</encoding>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <version>1.1</version>
-        <executions>
-          <execution>
-            <id>enforce-maven</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireMavenVersion>
-                  <version>3.0.0</version>
-                </requireMavenVersion>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-</plugins>	
-</pluginManagement>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>1.10</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.3.2</version>
+					<configuration>
+						<source>1.8</source>
+						<target>1.8</target>
+						<encoding>${project.build.sourceEncoding}</encoding>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>1.1</version>
+					<executions>
+						<execution>
+							<id>enforce-maven</id>
+							<goals>
+								<goal>enforce</goal>
+							</goals>
+							<configuration>
+								<rules>
+									<requireMavenVersion>
+										<version>3.0.0</version>
+									</requireMavenVersion>
+								</rules>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
 
-  </build>
-  <packaging>pom</packaging>
-  <modules>
-  	<module>jvm-npm-rhino</module>
-  	<module>jvm-npm-core</module>
-  </modules>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.9.1</version>
+					<configuration>
+						<additionalparam>-Xdoclint:none</additionalparam>
+						<outputDirectory>${project.build.directory}/apidocs</outputDirectory>
+					</configuration>
+				</plugin>
+
+			</plugins>
+		</pluginManagement>
+
+	</build>
+	<packaging>pom</packaging>
+	<modules>
+		<module>jvm-npm-rhino</module>
+		<module>jvm-npm-core</module>
+	</modules>
+
+	<profiles>
+		<profile>
+			<!-- 
+			==================================================================================== 
+				mvn deploy -Dgpg.passphrase= 
+			==================================================================================== 
+			-->
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.3</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.5.1</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>sonatype-server</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<stagingProfileId />
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>

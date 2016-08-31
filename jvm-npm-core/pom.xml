@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.bsc</groupId>
     <artifactId>jvm-npm</artifactId>
-    <version>0.3.1-SNAPSHOT</version>
+    <version>0.3.1</version>
   </parent>
   <artifactId>jvm-npm-core</artifactId>
   <name>JVM-NPM::Core</name>

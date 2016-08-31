@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.bsc</groupId>
     <artifactId>jvm-npm</artifactId>
-    <version>0.3.1-SNAPSHOT</version>
+    <version>0.3.1</version>
   </parent>
   <artifactId>jvm-npm-rhino</artifactId>
   <name>JVM-NPM::Rhino</name>
@@ -30,6 +30,35 @@
 
 </dependencies>  
 
+<build>
+
+<plugins>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-artifacts</id>
+            <phase>install</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>${project.build.directory}/${project.artifactId}-${project.version}-jdk7.jar</file>
+                  <type>jar</type>
+                  <classifier>jdk7</classifier>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+ 
+</plugins>
+</build>
 <profiles>
 
 	<profile>
