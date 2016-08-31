@@ -1,6 +1,8 @@
 # jvm-npm
 
-<a href="http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jvm-npm-core%22">
+<a href=http://search.maven.org/#search%7Cga%7C1%7Cjvm-npm-core"><img src="https://img.shields.io/maven-central/v/org.bsc/jvm-npm-core.svg">
+</a>
+
 
 Support for NPM module loading in Javascript runtimes on the JVM.
 
@@ -27,7 +29,7 @@ To enable **JVM-NPM** for Nashorn in your project  add dependency below
 
 and in your code load module
 
-```xml
+```java
 
     final ScriptEngineManager manager = new ScriptEngineManager();
 	
@@ -58,7 +60,7 @@ To enable **JVM-NPM** for Rhino in your project  add dependencies below
 
 and in your code load module
 
-```xml
+```java
 
     final ScriptEngineManager manager = new ScriptEngineManager();
 	
