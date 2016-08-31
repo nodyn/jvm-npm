@@ -9,6 +9,7 @@ declare namespace java {
         var Thread: any;
         var Exception: any;
         var Thread: any;
+        var Boolean: any;
     }
     namespace io {
         var File: any;

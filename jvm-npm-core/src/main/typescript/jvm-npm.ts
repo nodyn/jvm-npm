@@ -12,7 +12,8 @@ module = (typeof module == 'undefined') ? {} :  module;
       Scanner = java.util.Scanner,
       File    = java.io.File,
       Paths = java.nio.file.Paths,
-      Thread = java.lang.Thread
+      Thread = java.lang.Thread,
+      Boolean = java.lang.Boolean
       ;
 
   NativeRequire = (typeof NativeRequire === 'undefined') ? {} : NativeRequire;
@@ -85,7 +86,9 @@ module = (typeof module == 'undefined') ? {} :  module;
     static root:string = System.getProperty('user.dir');
     static NODE_PATH:string = undefined;
     static paths = [];
-    static debug = true;
+    static get debug():boolean {
+        return Boolean.getBoolean("jvm-npm.debug");
+    }
     static cache: { [s: string]: any; } = {};
     static extensions = {};
 

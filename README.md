@@ -32,3 +32,7 @@ See the `examples` directory for simple, runnable usage examples.
 Again, this will only work out of the box for pure JS NPM modules.
 Anything that depends on the Node.js API will not work with just
 this file.
+
+### Debug
+
+set system property `jvm-npm.debug` at `true`

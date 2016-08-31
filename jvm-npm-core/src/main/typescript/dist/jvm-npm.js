@@ -1,6 +1,6 @@
 module = (typeof module == 'undefined') ? {} : module;
 (function () {
-    var System = java.lang.System, Scanner = java.util.Scanner, File = java.io.File, Paths = java.nio.file.Paths, Thread = java.lang.Thread;
+    var System = java.lang.System, Scanner = java.util.Scanner, File = java.io.File, Paths = java.nio.file.Paths, Thread = java.lang.Thread, Boolean = java.lang.Boolean;
     NativeRequire = (typeof NativeRequire === 'undefined') ? {} : NativeRequire;
     if (typeof require === 'function' && !NativeRequire.require) {
         NativeRequire.require = require;
@@ -101,6 +101,13 @@ module = (typeof module == 'undefined') ? {} : module;
                 }
             }
         }
+        Object.defineProperty(Require, "debug", {
+            get: function () {
+                return Boolean.getBoolean("jvm-npm.debug");
+            },
+            enumerable: true,
+            configurable: true
+        });
         Require.resolve = function (id, parent) {
             if (Require.debug) {
                 print("\n\nRESOLVE:", id);
@@ -123,7 +130,6 @@ module = (typeof module == 'undefined') ? {} : module;
         Require.root = System.getProperty('user.dir');
         Require.NODE_PATH = undefined;
         Require.paths = [];
-        Require.debug = true;
         Require.cache = {};
         Require.extensions = {};
         return Require;
