@@ -55,7 +55,6 @@ module = (typeof module == 'undefined') ? {} :  module;
      *
      */
     static _load( file, parent:Module, core:boolean, main?:boolean ):any {
-      if( Require.debug ) print( "module._load", file, parent, core, main );
 
       var module = new Module(file, parent, core);
       var __FILENAME__ = module.filename;
@@ -89,7 +88,7 @@ module = (typeof module == 'undefined') ? {} :  module;
     }
 
     private getBody():string {
-      return readFile(this.filename, this.core);
+      return Resolve.readFile(this.filename, this.core);
     }
 
     private getParent():string {
@@ -104,22 +103,26 @@ module = (typeof module == 'undefined') ? {} :  module;
       static root = '';
       static NODE_PATH = undefined;
       static paths:Array<string> = [];
-      static debug = false;
+      static get debug():boolean {
+          return java.lang.Boolean.getBoolean("jvm-npm.debug");
+      }
       static cache: { [s: string]: any; } = {};
       static extensions = {};
 
       static resolve(id:string, parent?:Module):ResolveResult {
-          if( Require.debug ) print( "require.resolve", id, parent );
+          if( Require.debug ) {
+            print( "\n\nRESOLVE-CL:", id );
+          }
 
           var roots = findRoots(parent);
           for ( var i = 0 ; i < roots.length ; ++i ) {
             var root = Paths.get(roots[i]);
             var result =
-              resolveCoreModule(id, root)       ||
-              resolveAsFile(id, root, '.js')    ||
-              resolveAsFile(id, root, '.json')  ||
-              resolveAsDirectory(id, root)      ||
-              resolveAsNodeModule(id, root);
+              Resolve.asCoreModule(id, root)       ||
+              Resolve.asFile(id, root, '.js')    ||
+              Resolve.asFile(id, root, '.json')  ||
+              Resolve.asDirectory(id, root)      ||
+              Resolve.asNodeModule(id, root);
 
               if ( result ) {
                 return result;
@@ -129,24 +132,23 @@ module = (typeof module == 'undefined') ? {} :  module;
 
 
     constructor(id:string, parent:Module){
-          if( Require.debug )  print(  "require", id, parent );
 
           var file = Require.resolve(id, parent);
 
           if (!file) {
             if (typeof NativeRequire.require === 'function') {
               if (Require.debug) {
-                System.out.println(['Cannot resolve', id, 'defaulting to native'].join(' '));
+                print( 'Cannot resolve', id, 'defaulting to native' );
               }
               var native = NativeRequire.require(id);
               if (native) return native;
             }
-            System.err.println("Cannot find module " + id);
+            print("Cannot find module ", id);
             throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
           }
 
           try {
-            
+
             if (Require.cache[file.path]) {
               return Require.cache[file.path];
             } else if (String(file.path).endsWith('.js')) {
@@ -158,90 +160,86 @@ module = (typeof module == 'undefined') ? {} :  module;
             if (ex instanceof java.lang.Exception) {
               throw new ModuleError("Cannot load module " + id, "LOAD_ERROR", ex);
             } else {
-              System.out.println("Cannot load module " + id + " LOAD_ERROR");
+              print("Cannot load module ", id, " LOAD_ERROR");
               throw ex;
             }
           }
         }
   }
 
-  function resolveCoreModule(id:string, root:Path):ResolveResult {
-      if( Require.debug ) print(  "resolveCoreModule", id, root);
+  require = Require;
+  module.exports = Module;
 
-      var name = normalizeName(id);
+  class Resolve {
 
-      if (isResourceResolved(name))
-          return { path: name, core: true };
-    }
+    static asFile:(id, root, ext?:string) => any = _resolveAsFile;
 
-  function resolveAsNodeModule(id:string, root:Path):ResolveResult {
-    if( Require.debug ) print(  "resolveAsNodeModule", id, root);
+    static asDirectory:(id, root?) => any = _resolveAsDirectory;
 
-    var base = Paths.get(root, 'node_modules');
+    static readFile:(filename, core?:boolean) => any = _readFile;
 
-    return resolveAsFile(id, base) ||
-      resolveAsDirectory(id, base) ||
-      (root ? resolveAsNodeModule(id, root.getParent()) : undefined);
+    static asNodeModule:(id, root) => any = _resolveAsNodeModule;
+
+    static asCoreModule:(id, root) => any = _resolveAsCoreModule;
+
   }
 
-  function resolveAsDirectory(id:string, root?:Path):ResolveResult {
-    if( Require.debug ) print(  "resolveAsDirectory", id, root);
+  let indent = 0;
 
-    var base = mergePath(id,root),
-        file = base.resolve('package.json').toString();
-        ;
+  if( Require.debug ) {
 
-    if (isResourceResolved(file)) {
-      try {
-        var body = readFile( file, true ),
-            package  = JSON.parse(body);
-        if (package.main) {
-          return (resolveAsFile(package.main, base) ||
-                  resolveAsDirectory(package.main, base));
-        }
-        // if no package.main exists, look for index.js
-        //return resolveAsFile( 'index.js', base);
-      } catch(ex) {
-        throw new ModuleError("Cannot load JSON file", "PARSE_ERROR", ex);
-      }
+    Resolve.asFile = (id, root, ext?:string) => {
+
+        print( repeat(indent), "resolveAsFile", id, root, ext );
+        ++indent;
+        let result = _resolveAsFile( id, root, ext );
+        --indent;
+        print( repeat(indent), "result:", (result)?result.path:result );
+        return result;
     }
-    return resolveAsFile('index.js', base);
+
+    Resolve.asDirectory = (id, root?) => {
+
+      print( repeat(indent), "resolveAsDirectory", id, root );
+      ++indent;
+      let result = _resolveAsDirectory( id, root );
+      --indent;
+      print( repeat(indent), "result:", (result)?result.path:result  );
+      return result;
+    }
+
+    Resolve.asNodeModule = (id, root) => {
+
+        print( repeat(indent), "resolveAsNodeModule", id, root );
+        ++indent;
+        let result = _resolveAsNodeModule( id, root );
+        --indent;
+        print( repeat(indent), "result:", (result)?result.path:result  );
+        return result;
+    }
+
+
+    Resolve.readFile = (filename, core?:boolean) => {
+
+        print( repeat(indent), "readFile", filename, core );
+        return _readFile(filename, core);
+    }
+
+    Resolve.asCoreModule = (id, root) => {
+
+        print( repeat(indent), "resolveAsCoreModule", id, root );
+        ++indent;
+        let result = _resolveAsCoreModule( id, root );
+        --indent;
+        print( repeat(indent), "result:", (result)?result.path:result  );
+        return result;
+    }
+
   }
 
-  /**
-  resolveAsFile
-  @param id
-  @param root
-  @param ext
-  */
-  function resolveAsFile(id:string, root:Path, ext?:string):ResolveResult {
-
-    var file = mergePath(id,root).toString();
-
-    if( Require.debug ) print(  "resolveAsFile", id, root, ext, file);
-
-    file = normalizeName(file, ext || '.js');
-
-    if ( file.length > 0 && file[0] === '/' ) {
-
-      if (isResourceResolved(file)) {
-        return resolveAsDirectory(id);
-      }
-    }
-
-    if (isResourceResolved(file)) {
-      return { path:file, core:true };
-    }
-  }
-
-  function isResourceResolved( id:string ):boolean {
-    var cl = Thread.currentThread().getContextClassLoader();
-
-    var url = cl.getResource( id );
-
-    if( Require.debug ) print(  "\tisResourceResolved", url!=null, id );
-
-    return url!=null;
+  function repeat(n:number, ch:string = "-"):string {
+    if( n <=0 ) return ">";
+    return new Array(n*4).join(ch);
   }
 
   function findRoots(parent:Module):Array<string> {
@@ -272,12 +270,8 @@ module = (typeof module == 'undefined') ? {} :  module;
     return path.normalize();
   }
 
-  require = Require;
-
-  module.exports = Module;
-
   function loadJSON(file:string, core:boolean = false) {
-    var json = JSON.parse(readFile(file,core));
+    var json = JSON.parse(Resolve.readFile(file,core));
     Require.cache[file] = json;
     return json;
   }
@@ -290,9 +284,79 @@ module = (typeof module == 'undefined') ? {} :  module;
     return fileName + extension;
   }
 
-  function readFile(filename:string, core:boolean) {
+  function isResourceResolved( id:string ):boolean {
+    var cl = Thread.currentThread().getContextClassLoader();
 
-    if( Require.debug ) print(  '\treadFile', filename, core);
+    var url = cl.getResource( id );
+
+    return url!=null;
+  }
+
+  function _resolveAsCoreModule(id:string, root:Path):ResolveResult {
+
+      var name = normalizeName(id);
+
+      if (isResourceResolved(name))
+          return { path: name, core: true };
+  }
+
+  function _resolveAsNodeModule(id:string, root:Path):ResolveResult {
+
+    var base = Paths.get(root, 'node_modules');
+
+    return Resolve.asFile(id, base) ||
+      Resolve.asDirectory(id, base) ||
+      (root ? Resolve.asNodeModule(id, root.getParent()) : undefined);
+  }
+
+  function _resolveAsDirectory(id:string, root?:Path):ResolveResult {
+
+    var base = mergePath(id,root),
+        file = base.resolve('package.json').toString();
+        ;
+
+    if (isResourceResolved(file)) {
+      try {
+        var body = Resolve.readFile( file, true ),
+            package  = JSON.parse(body);
+        if (package.main) {
+          return (Resolve.asFile(package.main, base) ||
+                  Resolve.asDirectory(package.main, base));
+        }
+        // if no package.main exists, look for index.js
+        //return resolveAsFile( 'index.js', base);
+      } catch(ex) {
+        throw new ModuleError("Cannot load JSON file", "PARSE_ERROR", ex);
+      }
+    }
+    return Resolve.asFile('index.js', base);
+  }
+
+  /**
+  resolveAsFile
+  @param id
+  @param root
+  @param ext
+  */
+  function _resolveAsFile(id:string, root:Path, ext?:string):ResolveResult {
+
+    var file = mergePath(id,root).toString();
+
+    file = normalizeName(file, ext || '.js');
+
+    if ( file.length > 0 && file[0] === '/' ) {
+
+      if (isResourceResolved(file)) {
+        return Resolve.asDirectory(id);
+      }
+    }
+
+    if (isResourceResolved(file)) {
+      return { path:file, core:true };
+    }
+  }
+
+  function _readFile(filename:string, core:boolean) {
 
     var input;
     try {

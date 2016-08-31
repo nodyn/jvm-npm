@@ -12,8 +12,7 @@ module = (typeof module == 'undefined') ? {} :  module;
       Scanner = java.util.Scanner,
       File    = java.io.File,
       Paths = java.nio.file.Paths,
-      Thread = java.lang.Thread,
-      Boolean = java.lang.Boolean
+      Thread = java.lang.Thread
       ;
 
   NativeRequire = (typeof NativeRequire === 'undefined') ? {} : NativeRequire;
@@ -87,7 +86,7 @@ module = (typeof module == 'undefined') ? {} :  module;
     static NODE_PATH:string = undefined;
     static paths = [];
     static get debug():boolean {
-        return Boolean.getBoolean("jvm-npm.debug");
+        return java.lang.Boolean.getBoolean("jvm-npm.debug");
     }
     static cache: { [s: string]: any; } = {};
     static extensions = {};
@@ -117,7 +116,7 @@ module = (typeof module == 'undefined') ? {} :  module;
       if (!file) {
         if (typeof NativeRequire.require === 'function') {
           if (Require.debug) {
-            System.out.println(['cannot resolve', id, 'defaulting to native'].join(' '));
+            print('cannot resolve', id, 'defaulting to native');
           }
           try {
               native = NativeRequire.require(id);
@@ -127,7 +126,7 @@ module = (typeof module == 'undefined') ? {} :  module;
           }
         }
         if (Require.debug) {
-          System.err.println("cannot load module " + id);
+          print("cannot load module ", id);
         }
         throw new ModuleError("cannot load module " + id, "MODULE_NOT_FOUND");
       }

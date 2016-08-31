@@ -1,6 +1,6 @@
 module = (typeof module == 'undefined') ? {} : module;
 (function () {
-    var System = java.lang.System, Scanner = java.util.Scanner, File = java.io.File, Paths = java.nio.file.Paths, Thread = java.lang.Thread, Boolean = java.lang.Boolean;
+    var System = java.lang.System, Scanner = java.util.Scanner, File = java.io.File, Paths = java.nio.file.Paths, Thread = java.lang.Thread;
     NativeRequire = (typeof NativeRequire === 'undefined') ? {} : NativeRequire;
     if (typeof require === 'function' && !NativeRequire.require) {
         NativeRequire.require = require;
@@ -60,7 +60,7 @@ module = (typeof module == 'undefined') ? {} : module;
             if (!file) {
                 if (typeof NativeRequire.require === 'function') {
                     if (Require.debug) {
-                        System.out.println(['cannot resolve', id, 'defaulting to native'].join(' '));
+                        print('cannot resolve', id, 'defaulting to native');
                     }
                     try {
                         native = NativeRequire.require(id);
@@ -72,7 +72,7 @@ module = (typeof module == 'undefined') ? {} : module;
                     }
                 }
                 if (Require.debug) {
-                    System.err.println("cannot load module " + id);
+                    print("cannot load module ", id);
                 }
                 throw new ModuleError("cannot load module " + id, "MODULE_NOT_FOUND");
             }
@@ -103,7 +103,7 @@ module = (typeof module == 'undefined') ? {} : module;
         }
         Object.defineProperty(Require, "debug", {
             get: function () {
-                return Boolean.getBoolean("jvm-npm.debug");
+                return java.lang.Boolean.getBoolean("jvm-npm.debug");
             },
             enumerable: true,
             configurable: true
