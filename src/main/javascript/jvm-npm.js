@@ -194,8 +194,8 @@ module = (typeof module == 'undefined') ? {} :  module;
 
   function resolveAsNodeModule(id, root) {
     var base = [root, 'node_modules'].join('/');
-    return resolveAsFile(id, base) ||
-      resolveAsDirectory(id, base) ||
+    return resolveAsDirectory(id, base) ||
+      resolveAsFile(id, base) ||
       (root ? resolveAsNodeModule(id, new File(root).getParent()) : false);
   }
 
