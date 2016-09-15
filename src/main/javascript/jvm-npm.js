@@ -74,15 +74,15 @@ module = (typeof module == 'undefined') ? {} :  module;
   };
 
   function Require(id, parent) {
-    var core, native, file = Require.resolve(id, parent);
+    var core, native_, file = Require.resolve(id, parent);
 
     if (!file) {
       if (typeof NativeRequire.require === 'function') {
         if (Require.debug) {
           System.out.println(['Cannot resolve', id, 'defaulting to native'].join(' '));
         }
-        native = NativeRequire.require(id);
-        if (native) return native;
+        native_ = NativeRequire.require(id);
+        if (native_) return native_;
       }
       System.err.println("Cannot find module " + id);
       throw new ModuleError("Cannot find module " + id, "MODULE_NOT_FOUND");
@@ -205,10 +205,10 @@ module = (typeof module == 'undefined') ? {} :  module;
     if (file.exists()) {
       try {
         var body = readFile(file.getCanonicalPath()),
-            package  = JSON.parse(body);
-        if (package.main) {
-          return (resolveAsFile(package.main, base) ||
-                  resolveAsDirectory(package.main, base));
+            package_  = JSON.parse(body);
+        if (package_.main) {
+          return (resolveAsFile(package_.main, base) ||
+                  resolveAsDirectory(package_.main, base));
         }
         // if no package.main exists, look for index.js
         return resolveAsFile('index.js', base);
