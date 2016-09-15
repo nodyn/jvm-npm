@@ -162,7 +162,7 @@ module = (typeof module == 'undefined') ? {} :  module;
     if ( Require.NODE_PATH ) {
       r = r.concat( parsePaths( Require.NODE_PATH ) );
     } else {
-      var NODE_PATH = java.lang.System.getenv.NODE_PATH;
+      var NODE_PATH = java.lang.System.getenv().NODE_PATH;
       if ( NODE_PATH ) {
         r = r.concat( parsePaths( NODE_PATH ) );
       }
