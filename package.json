@@ -21,6 +21,9 @@
     "url": "git+https://github.com/nodyn/jvm-npm.git"
   },
   "author": "Lance Ball <lball@redhat.com> (http://lanceball.com)",
+  "contributors": [
+    "Bob McWhirter <bmcwhirter@redhat.com>",
+    "Helio Frota <hesilva@redhat.com> (http://lanceball.com)"],
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/nodyn/jvm-npm/issues"
