@@ -8,6 +8,6 @@ script:
    - make ci
 branches:
   only:
-    - bgold_guidelines
+    - master
 notifications:
   irc: "irc.freenode.org#brass-monkey"
