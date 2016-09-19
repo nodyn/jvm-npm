@@ -1,6 +1,6 @@
 {
   "name": "jvm-npm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Support for NPM module loading in Javascript runtimes on the JVM",
   "main": "src/main/javascript/jvm-npm.js",
   "directories": {
