@@ -7,8 +7,15 @@
     "example": "examples"
   },
   "scripts": {
-    "test": "mvn integration-test"
+    "test": "mvn integration-test",
+    "lint": "eslint src/main/javascript/jvm-npm.js"
   },
+  "files": [
+    "package.json",
+    "pom.xml",
+    "README.md",
+    "src"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nodyn/jvm-npm.git"
@@ -18,5 +25,13 @@
   "bugs": {
     "url": "https://github.com/nodyn/jvm-npm/issues"
   },
-  "homepage": "https://github.com/nodyn/jvm-npm#readme"
+  "homepage": "https://github.com/nodyn/jvm-npm#readme",
+  "devDependencies": {
+    "eslint": "^3.5.0",
+    "eslint-config-semistandard": "^7.0.0",
+    "eslint-config-standard": "^6.0.1",
+    "eslint-plugin-promise": "^2.0.1",
+    "eslint-plugin-react": "^6.2.2",
+    "eslint-plugin-standard": "^2.0.0"
+  }
 }
