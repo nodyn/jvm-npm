@@ -1,0 +1,36 @@
+{
+  "extends": "semistandard",
+  "globals": {
+    "java": false,
+    "NativeRequire": true
+  },
+  "rules": {
+    "no-global-assign": [
+      "error",
+      {
+        "exceptions": [
+          "module",
+          "require"
+        ]
+      }
+    ],
+    "no-native-reassign": [
+      "error",
+      {
+        "exceptions": [
+          "module",
+          "require"
+        ]
+      }
+    ],
+    "no-extend-native": [
+      "error",
+      {
+        "exceptions": [
+          "String"
+        ]
+      }
+    ],
+    "no-new-func": "off"
+  }
+}
