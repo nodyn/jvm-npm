@@ -221,12 +221,12 @@ module = (typeof module === 'undefined') ? {} : module;
   function resolveAsFile (id, root, ext) {
     var file;
     if (id.length > 0 && id[0] === '/') {
-      file = new File(normalizeName(id, ext || '.js'));
+      file = new File(normalizeName(id, ext));
       if (!file.exists()) {
         return resolveAsDirectory(id);
       }
     } else {
-      file = new File([root, normalizeName(id, ext || '.js')].join('/'));
+      file = new File([root, normalizeName(id, ext)].join('/'));
     }
     if (file.exists()) {
       return file.getCanonicalPath();
