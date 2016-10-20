@@ -58,8 +58,7 @@ module = (typeof module === 'undefined') ? {} : module;
     var module = new Module(file, parent, core);
     var body = readFile(module.filename, module.core);
     var dir = new File(module.filename).getParent();
-    var args = ['exports', 'module', 'require', '__filename', '__dirname'];
-    var func = new Function(args, body);
+    var func = new Function('exports', 'module', 'require', '__filename', '__dirname', body);
     func.apply(module,
       [module.exports, module, module.require, module.filename, dir]);
     module.loaded = true;
